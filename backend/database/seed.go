@@ -3,7 +3,6 @@ package database
 import (
 	"farmsville/backend/models"
 	"log"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -65,39 +64,34 @@ func seedDB(db *gorm.DB) {
 	// Create sample claimed items
 	claimedItems := []models.ClaimedItem{
 		{
-			ItemID:      1, // Organic Tomatoes
-			User:        "john.doe@example.com",
-			Quantity:    5,
-			DateClaimed: time.Now().Add(-48 * time.Hour), // 2 days ago
-			Active:      true,
+			ItemID:   1, // Organic Tomatoes
+			User:     "john.doe@example.com",
+			Quantity: 5,
+			Active:   true,
 		},
 		{
-			ItemID:      2, // Fresh Eggs
-			User:        "jane.smith@example.com",
-			Quantity:    2,
-			DateClaimed: time.Now().Add(-24 * time.Hour), // 1 day ago
-			Active:      true,
+			ItemID:   2, // Fresh Eggs
+			User:     "jane.smith@example.com",
+			Quantity: 2,
+			Active:   true,
 		},
 		{
-			ItemID:      3, // Honey
-			User:        "mark.johnson@example.com",
-			Quantity:    1,
-			DateClaimed: time.Now().Add(-72 * time.Hour), // 3 days ago
-			Active:      true,
+			ItemID:   3, // Honey
+			User:     "mark.johnson@example.com",
+			Quantity: 1,
+			Active:   true,
 		},
 		{
-			ItemID:      1, // Organic Tomatoes
-			User:        "sarah.williams@example.com",
-			Quantity:    3,
-			DateClaimed: time.Now().Add(-12 * time.Hour), // 12 hours ago
-			Active:      true,
+			ItemID:   1, // Organic Tomatoes
+			User:     "sarah.williams@example.com",
+			Quantity: 3,
+			Active:   true,
 		},
 		{
-			ItemID:      5, // Apples
-			User:        "robert.brown@example.com",
-			Quantity:    2,
-			DateClaimed: time.Now().Add(-36 * time.Hour), // 36 hours ago
-			Active:      true,
+			ItemID:   5, // Apples
+			User:     "robert.brown@example.com",
+			Quantity: 2,
+			Active:   true,
 		},
 	}
 
