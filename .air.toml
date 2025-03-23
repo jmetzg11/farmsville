@@ -1,0 +1,10 @@
+root = "."
+tmp_dir = "tmp"
+[build]
+  bin = "tmp/main"
+  cmd = "go build -o tmp/main ."
+  include_ext = ["go", "html", "tmpl"]
+  exclude_dir = ["vendor", "tmp", "frontend"]
+[log]
+  level = "debug"
+
