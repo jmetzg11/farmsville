@@ -1,6 +1,12 @@
 <script>
-	import { formatDate } from '$lib/root/helpers.js';
+	import AuthModal from './AuthModal.svelte';
+	import { formatDate } from './helpers.js';
 	export let items;
+	let showModal = false;
+
+	function handleClick() {
+		showModal = true;
+	}
 </script>
 
 <div class="container mx-auto px-4 py-6">
@@ -29,9 +35,10 @@
 							</div>
 						</div>
 						<button
+							onclick={() => handleClick(item)}
 							class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
 						>
-							Claim
+							{item.remaining_quantity <= 0 ? 'Out of Stock' : 'Claim'}
 						</button>
 					</div>
 				</div>
@@ -39,3 +46,5 @@
 		{/each}
 	</div>
 </div>
+
+<AuthModal bind:showModal />

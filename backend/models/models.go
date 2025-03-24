@@ -25,3 +25,11 @@ type ClaimedItem struct {
 	CreatedAt time.Time `json:"created_at"`
 	Active    bool      `json:"active"`
 }
+
+type AuthCode struct {
+	ID        uint   `gorm:"primaryKey"`
+	Email     string `gorm:"index"`
+	Code      string
+	ExpiresAt time.Time
+	CreatedAt time.Time
+}

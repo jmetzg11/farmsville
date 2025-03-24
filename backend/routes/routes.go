@@ -24,6 +24,8 @@ func SetupAPIRoutes(router *gin.Engine) {
 		// admin
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
+		// users
+		apiRouter.POST("/auth", handler.SendAuth)
 
 	}
 }
