@@ -1,0 +1,285 @@
+func TestVerifyAuth(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Mock auth function
+	auth.GenerateJWT = func(user models.User) (string, error) {
+		return "jwt_token_123", nil
+	}
+
+	// Restore original function after test
+	defer func() {
+		auth.GenerateJWT = originalGenerateJWT
+	}()
+
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+	router := setupUsersRouter(handler)
+
+	// Create a user with a valid auth code
+	expiresAt := time.Now().Add(15 * time.Minute)
+	user := models.User{
+		Email:     "test@example.com",
+		Code:      "123456",
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+		Admin:     false,
+	}
+	db.Create(&user)
+
+	// Create request body
+	reqBody := map[string]string{
+		"email": "test@example.com",
+		"code":  "123456",
+	}
+	jsonBody, _ := json.Marshal(reqBody)
+
+	// Create request
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth/verify", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Perform request
+	router.ServeHTTP(w, req)
+
+	// Check response
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
+	}
+
+	var response map[string]interface{}
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to parse response: %v", err)
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		t.Errorf("Expected success to be true, got %v", response["success"])
+	}
+
+	if message, ok := response["message"].(string); !ok || message != "Authentication successful" {
+		t.Errorf("Expected message to be 'Authentication successful', got %v", response["message"])
+	}
+
+	// Check cookie
+	cookies := w.Result().Cookies()
+	var foundAuthCookie bool
+	for _, cookie := range cookies {
+		if cookie.Name == "auth_token" {
+			foundAuthCookie = true
+			if cookie.Value != "jwt_token_123" {
+				t.Errorf("Expected auth_token value to be 'jwt_token_123', got '%s'", cookie.Value)
+			}
+			break
+		}
+	}
+
+	if !foundAuthCookie {
+		t.Errorf("Expected auth_token cookie not found")
+	}
+}
+
+func TestVerifyAuth_InvalidCode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+	router := setupUsersRouter(handler)
+
+	// Create a user with a valid auth code
+	expiresAt := time.Now().Add(15 * time.Minute)
+	user := models.User{
+		Email:     "test@example.com",
+		Code:      "123456",
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+		Admin:     false,
+	}
+	db.Create(&user)
+
+	// Create request body with invalid code
+	reqBody := map[string]string{
+		"email": "test@example.com",
+		"code":  "invalid",
+	}
+	jsonBody, _ := json.Marshal(reqBody)
+
+	// Create request
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth/verify", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Perform request
+	router.ServeHTTP(w, req)
+
+	// Check response
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected status code %d, got %d", http.StatusUnauthorized, w.Code)
+	}
+
+	var response map[string]interface{}
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to parse response: %v", err)
+	}
+
+	if errorMsg, ok := response["error"].(string); !ok || errorMsg != "Invalid code or code expired" {
+		t.Errorf("Expected error to be 'Invalid code or code expired', got %v", response["error"])
+	}
+}
+
+func TestVerifyAuth_ExpiredCode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+	router := setupUsersRouter(handler)
+
+	// Create a user with an expired auth code
+	expiresAt := time.Now().Add(-5 * time.Minute) // Expired 5 minutes ago
+	user := models.User{
+		Email:     "test@example.com",
+		Code:      "123456",
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+		Admin:     false,
+	}
+	db.Create(&user)
+
+	// Create request body
+	reqBody := map[string]string{
+		"email": "test@example.com",
+		"code":  "123456",
+	}
+	jsonBody, _ := json.Marshal(reqBody)
+
+	// Create request
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth/verify", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Perform request
+	router.ServeHTTP(w, req)
+
+	// Check response
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected status code %d, got %d", http.StatusUnauthorized, w.Code)
+	}
+
+	var response map[string]interface{}
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to parse response: %v", err)
+	}
+
+	if errorMsg, ok := response["error"].(string); !ok || errorMsg != "Invalid code or code expired" {
+		t.Errorf("Expected error to be 'Invalid code or code expired', got %v", response["error"])
+	}
+}
+
+func TestUpdateOrCreateUser_Create(t *testing.T) {
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+
+	// Test creating a new user
+	err := handler.updateOrCreateUser("newuser@example.com", "123456")
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	// Verify user was created
+	var user models.User
+	result := db.Where("email = ?", "newuser@example.com").First(&user)
+	if result.Error != nil {
+		t.Fatalf("Failed to find user: %v", result.Error)
+	}
+
+	if user.Code != "123456" {
+		t.Errorf("Expected user code to be '123456', got '%s'", user.Code)
+	}
+
+	if user.Admin {
+		t.Errorf("Expected user to not be admin")
+	}
+}
+
+func TestUpdateOrCreateUser_Update(t *testing.T) {
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+
+	// Create existing user
+	existingUser := models.User{
+		Email:     "existing@example.com",
+		Code:      "old_code",
+		ExpiresAt: time.Now(),
+		CreatedAt: time.Now().Add(-24 * time.Hour), // Created a day ago
+		Admin:     true,
+	}
+	db.Create(&existingUser)
+
+	// Test updating existing user
+	err := handler.updateOrCreateUser("existing@example.com", "new_code")
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	// Verify user was updated
+	var updatedUser models.User
+	result := db.Where("email = ?", "existing@example.com").First(&updatedUser)
+	if result.Error != nil {
+		t.Fatalf("Failed to find user: %v", result.Error)
+	}
+
+	if updatedUser.Code != "new_code" {
+		t.Errorf("Expected user code to be 'new_code', got '%s'", updatedUser.Code)
+	}
+
+	if !updatedUser.Admin {
+		t.Errorf("Expected user to remain admin")
+	}
+
+	if !updatedUser.CreatedAt.Equal(existingUser.CreatedAt) {
+		t.Errorf("Expected creation time to not change")
+	}
+}
+
+func TestGetUserByEmail(t *testing.T) {
+	// Setup database and handler
+	db := setupUsersDB(t)
+	handler := NewHandler(db)
+
+	// Create a user
+	user := models.User{
+		Email:     "test@example.com",
+		Code:      "123456",
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+		CreatedAt: time.Now(),
+		Admin:     false,
+	}
+	db.Create(&user)
+
+	// Test getting existing user
+	foundUser, err := handler.getUserByEmail("test@example.com")
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if foundUser.Email != user.Email {
+		t.Errorf("Expected user email to be '%s', got '%s'", user.Email, foundUser.Email)
+	}
+
+	if foundUser.Code != user.Code {
+		t.Errorf("Expected user code to be '%s', got '%s'", user.Code, foundUser.Code)
+	}
+
+	// Test getting non-existent user
+	_, err = handler.getUserByEmail("nonexistent@example.com")
+	if err == nil {
+		t.Errorf("Expected error for non-existent user, got nil")
+	}
+
+	if err != nil && err.Error() != "user not found" {
+		t.Errorf("Expected error message to be 'user not found', got '%s'", err.Error())
+	}
+}

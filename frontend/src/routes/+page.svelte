@@ -4,6 +4,7 @@
 	import ClaimedItmes from '$lib/root/ClaimedItmes.svelte';
 	let items;
 	let claimedItems;
+	import { user } from '$lib/stores/auth';
 	async function getComments() {
 		try {
 			const url = `${import.meta.env.VITE_API_URL}/items`;
@@ -16,7 +17,6 @@
 			const data = await response.json();
 			items = data.items;
 			claimedItems = data.claimedItems;
-			console.log(data);
 		} catch (error) {
 			console.error('Error fetching items', error);
 		}
@@ -25,6 +25,8 @@
 		getComments();
 	});
 </script>
+
+<h1>Welcome, {$user.name ? $user.name : $user.email}</h1>
 
 <Items {items} />
 

@@ -3,19 +3,58 @@ package api
 import (
 	"encoding/json"
 	"farmsville/backend/models"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
+
+func setupCustomersDB(t *testing.T) *gorm.DB {
+	// Create a unique name for this in-memory database instance
+	// Each test will get its own isolated database
+	dbID := fmt.Sprintf("file:memdb%d?mode=memory&cache=shared", time.Now().UnixNano())
+
+	db, err := gorm.Open(sqlite.Open(dbID), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		sqlDB.Close()
+	})
+
+	err = db.AutoMigrate(&models.Item{}, &models.ClaimedItem{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return db
+}
+
+func setupCustomersRouter(handler *Handler) *gin.Engine {
+	router := gin.New()
+
+	router.GET("/items", handler.GetItems)
+
+	return router
+}
 
 func TestGetItems(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	db := setupTestDB(t)
+	db := setupCustomersDB(t)
 	handler := NewHandler(db)
-	router := setupTestRouter(handler)
+	router := setupCustomersRouter(handler)
 
 	item1 := models.Item{
 		Name:         "Test Item 1",

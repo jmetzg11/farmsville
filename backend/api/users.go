@@ -1,15 +1,15 @@
 package api
 
 import (
+	"errors"
 	"farmsville/backend/models"
 	"fmt"
-	"math/rand"
 	"net/http"
-	"net/smtp"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func (h *Handler) SendAuth(c *gin.Context) {
@@ -19,13 +19,19 @@ func (h *Handler) SendAuth(c *gin.Context) {
 		return
 	}
 
-	authCode, err := h.generateRandomCode(req.Email, 6)
+	authCode, err := h.authService.GenerateRandomCode()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 		return
 	}
 
-	err = sendEmailWithAuthCode(req.Email, authCode)
+	err = h.updateOrCreateUser(req.Email, authCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.authService.SendEmailWithAuthCode(req.Email, authCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email"})
 		return
@@ -38,54 +44,95 @@ func (h *Handler) SendAuth(c *gin.Context) {
 
 }
 
-func (h *Handler) generateRandomCode(email string, length int) (string, error) {
-	const digits = "0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = digits[rand.Intn(len(digits))]
-	}
+func (h *Handler) updateOrCreateUser(email, code string) error {
+	expiresAt := time.Now().Add(15 * time.Minute)
+	var existingUser models.User
+	result := h.db.Where("email = ?", email).First(&existingUser)
 
-	expiresAt := time.Now().Add(5 * time.Minute)
-	authCode := models.AuthCode{
-		Email:     email,
-		Code:      string(b),
-		ExpiresAt: expiresAt,
-		CreatedAt: time.Now(),
+	if result.Error == nil {
+		// User exists, update their code and expiration
+		existingUser.Code = code
+		existingUser.ExpiresAt = expiresAt
+		if err := h.db.Save(&existingUser).Error; err != nil {
+			return fmt.Errorf("failed to update existing user: %w", err)
+		}
+		return nil
+	} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		// User does not exist, create a new one
+		newUser := models.User{
+			Email:     email,
+			Code:      code,
+			ExpiresAt: expiresAt,
+			CreatedAt: time.Now(),
+			Admin:     false,
+		}
+		if err := h.db.Create(&newUser).Error; err != nil {
+			return fmt.Errorf("failed to create new user: %w", err)
+		}
+		return nil
+	} else {
+		return fmt.Errorf("database error: %w", result.Error)
 	}
-
-	if err := h.db.Create(&authCode).Error; err != nil {
-		return "", err
-	}
-
-	return string(b), nil
 }
 
-func sendEmailWithAuthCode(toEmail, code string) error {
-	smtpHost := "smtp.gmail.com"
-	smtpPort := 587
-	smtpUsername := os.Getenv("GMAIL_USER")
-	smtpPassword := os.Getenv("GMAIL_PASS")
+func (h *Handler) VerifyAuth(c *gin.Context) {
+	var req models.AuthRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
 
-	fmt.Print(smtpUsername)
-	fmt.Print(smtpPassword)
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
 
-	from := smtpUsername
-	to := []string{toEmail}
-	subject := "Authentication code for Farmsville"
-	body := fmt.Sprintf("Your authentication code is: %s", code)
+	if user.Code == req.Code && user.ExpiresAt.After(time.Now()) {
+		token, err := h.authService.GenerateJWT(user)
 
-	message := []byte(fmt.Sprintf("From: %s\r\n"+
-		"To: %s\r\n"+
-		"Subject: %s\r\n\r\n"+
-		"%s", from, toEmail, subject, body))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+			return
+		}
 
-	auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpHost)
+		isProduction := os.Getenv("GIN_MODE") == "release"
 
-	return smtp.SendMail(
-		fmt.Sprintf("%s:%d", smtpHost, smtpPort),
-		auth,
-		from,
-		to,
-		message,
-	)
+		maxAge := 90 * 24 * 60 * 60
+		c.SetCookie(
+			"auth_token",
+			token,
+			maxAge,
+			"/",
+			"",
+			isProduction,
+			true,
+		)
+		returnUser := gin.H{
+			"name":  user.Name,
+			"email": user.Email,
+			"admin": user.Admin,
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Authentication successful",
+			"user":    returnUser,
+		})
+		return
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid code or code expired"})
+		return
+	}
+}
+
+func (h *Handler) getUserByEmail(email string) (models.User, error) {
+	var user models.User
+	result := h.db.Where("email = ?", email).First(&user)
+	if result.Error == nil {
+		return user, nil
+	} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return models.User{}, fmt.Errorf("user not found")
+	} else {
+		return models.User{}, fmt.Errorf("database error: %w", result.Error)
+	}
 }

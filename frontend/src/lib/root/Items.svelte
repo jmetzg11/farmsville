@@ -1,11 +1,12 @@
 <script>
 	import AuthModal from './AuthModal.svelte';
+	import MakeClaimModal from './MakeClaimModal.svelte';
 	import { formatDate } from './helpers.js';
 	export let items;
-	let showModal = false;
-
+	let showModalAuthModal = false;
+	let makeClaimModal = false;
 	function handleClick() {
-		showModal = true;
+		showModalAuthModal = true;
 	}
 </script>
 
@@ -47,4 +48,6 @@
 	</div>
 </div>
 
-<AuthModal bind:showModal />
+<AuthModal bind:showModalAuthModal />
+
+<MakeClaimModal bind:makeClaimModal />

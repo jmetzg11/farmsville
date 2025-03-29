@@ -26,9 +26,11 @@ type ClaimedItem struct {
 	Active    bool      `json:"active"`
 }
 
-type AuthCode struct {
+type User struct {
 	ID        uint   `gorm:"primaryKey"`
 	Email     string `gorm:"index"`
+	Name      string
+	Admin     bool
 	Code      string
 	ExpiresAt time.Time
 	CreatedAt time.Time
