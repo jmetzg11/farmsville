@@ -78,7 +78,7 @@
 	}
 </script>
 
-{#if showModal}
+{#if showModalAuthModal}
 	<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
 			{#if status === 'start'}

@@ -1,28 +1,20 @@
 <script>
 	import { onMount } from 'svelte';
+	import { initializeUserStore } from '$lib/stores/auth';
+	import { getComments } from '$lib/root/helpers';
 	import Items from '$lib/root/Items.svelte';
 	import ClaimedItmes from '$lib/root/ClaimedItmes.svelte';
-	let items;
-	let claimedItems;
+	let items = [];
+	let claimedItems = [];
 	import { user } from '$lib/stores/auth';
-	async function getComments() {
-		try {
-			const url = `${import.meta.env.VITE_API_URL}/items`;
-			const response = await fetch(url);
 
-			if (!response.ok) {
-				throw new Error('Failed to get items');
-			}
-
-			const data = await response.json();
-			items = data.items;
-			claimedItems = data.claimedItems;
-		} catch (error) {
-			console.error('Error fetching items', error);
+	onMount(async () => {
+		const results = await getComments();
+		if (results) {
+			items = results.items;
+			claimedItems = results.claimedItems;
 		}
-	}
-	onMount(() => {
-		getComments();
+		initializeUserStore();
 	});
 </script>
 

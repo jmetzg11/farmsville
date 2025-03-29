@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 )
 
@@ -135,4 +136,80 @@ func (h *Handler) getUserByEmail(email string) (models.User, error) {
 	} else {
 		return models.User{}, fmt.Errorf("database error: %w", result.Error)
 	}
+}
+
+func (h *Handler) AuthMe(c *gin.Context) {
+	tokenString, err := c.Cookie("auth_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Not authenticated",
+		})
+		return
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "fallback-secret-key"
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Validate the signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(jwtSecret), nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Invalid token",
+		})
+		return
+	}
+
+	// Check if the token is valid
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, ok := claims["user_id"].(float64)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "Invalid user ID in token",
+			})
+			return
+		}
+
+		user, err := h.getUserByID(uint(userID))
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "User not found",
+			})
+			return
+		}
+
+		returnUser := gin.H{
+			"name":  user.Name,
+			"email": user.Email,
+			"admin": user.Admin,
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Authentication successful",
+			"user":    returnUser,
+		})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Invalid token",
+		})
+	}
+}
+
+func (h *Handler) getUserByID(id uint) (models.User, error) {
+	var user models.User
+	result := h.db.First(&user, id)
+	return user, result.Error
 }

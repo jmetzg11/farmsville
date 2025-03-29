@@ -1,5 +1,7 @@
 <script>
-	import AuthModal from './AuthModal.svelte';
+	import { user } from '$lib/stores/auth';
+	import { onMount } from 'svelte';
+	import AuthModal from '../reusable/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
 	import { formatDate } from './helpers.js';
 	export let items;
@@ -8,6 +10,10 @@
 	function handleClick() {
 		showModalAuthModal = true;
 	}
+
+	// onMount(() => {
+	// 	console.log($user);
+	// });
 </script>
 
 <div class="container mx-auto px-4 py-6">
