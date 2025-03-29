@@ -161,7 +161,7 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		return []byte(jwtSecret), nil
 	})
 
-	if err != nil {
+	if err != nil || !token.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"message": "Invalid token",
@@ -206,10 +206,4 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"message": "Invalid token",
 		})
 	}
-}
-
-func (h *Handler) getUserByID(id uint) (models.User, error) {
-	var user models.User
-	result := h.db.First(&user, id)
-	return user, result.Error
 }

@@ -28,6 +28,13 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.POST("/auth", handler.SendAuth)
 		apiRouter.POST("/auth/verify", handler.VerifyAuth)
 		apiRouter.GET("/auth/me", handler.AuthMe)
+
+		authRoutes := apiRouter.Group("/")
+		authRoutes.Use(handler.AuthMiddleware())
+		{
+			// customers
+			authRoutes.POST("/items/claim", handler.MakeClaim)
+		}
 	}
 }
 
