@@ -1,13 +1,13 @@
 <script>
 	import { setUser } from '$lib/stores/auth';
-	let { showModalAuthModal = $bindable(false) } = $props();
+	let { showAuthModal = $bindable(false), showClaimModal = $bindable(false) } = $props();
 	let email = $state('');
 	let code = $state('');
 	let status = $state('start');
 	let isEmailValid = $derived(email.includes('@') && email.length >= 5);
 
 	function closeModal() {
-		showModalAuthModal = false;
+		showAuthModal = false;
 		email = '';
 		status = 'start';
 		code = '';
@@ -65,6 +65,7 @@
 				const data = await response.json();
 				setUser(data.user);
 				closeModal();
+				showClaimModal = true;
 			} else {
 				status = 'error';
 			}
@@ -78,8 +79,10 @@
 	}
 </script>
 
-{#if showModalAuthModal}
-	<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+{#if showAuthModal}
+	<div
+		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
+	>
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
 			{#if status === 'start'}
 				<p class="text-gray-600 mb-4">

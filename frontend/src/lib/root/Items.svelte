@@ -1,19 +1,21 @@
 <script>
 	import { user } from '$lib/stores/auth';
-	import { onMount } from 'svelte';
 	import AuthModal from '../reusable/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
 	import { formatDate } from './helpers.js';
-	export let items;
-	let showModalAuthModal = false;
-	let makeClaimModal = false;
-	function handleClick() {
-		showModalAuthModal = true;
-	}
+	let { items } = $props();
+	let showAuthModal = $state(false);
+	let showClaimModal = $state(false);
+	let selectedItem = $state(null);
 
-	// onMount(() => {
-	// 	console.log($user);
-	// });
+	function handleClick(item) {
+		selectedItem = item;
+		if ($user.isAuthenticated) {
+			showClaimModal = true;
+		} else {
+			showAuthModal = true;
+		}
+	}
 </script>
 
 <div class="container mx-auto px-4 py-6">
@@ -54,6 +56,6 @@
 	</div>
 </div>
 
-<AuthModal bind:showModalAuthModal />
+<AuthModal bind:showAuthModal bind:showClaimModal />
 
-<MakeClaimModal bind:makeClaimModal />
+<MakeClaimModal bind:showClaimModal {selectedItem} />

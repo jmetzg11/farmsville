@@ -1,6 +1,6 @@
 <script>
 	import { formatDate } from './helpers.js';
-	export let claimedItems;
+	let { claimedItems } = $props();
 </script>
 
 <div class="container mx-auto px-4 py-6">
