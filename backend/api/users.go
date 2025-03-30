@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -60,12 +62,14 @@ func (h *Handler) updateOrCreateUser(email, code string) error {
 		return nil
 	} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// User does not exist, create a new one
+		adminEmails := strings.Split(os.Getenv("ADMIN_EMAILS"), ",")
+
 		newUser := models.User{
 			Email:     email,
 			Code:      code,
 			ExpiresAt: expiresAt,
 			CreatedAt: time.Now(),
-			Admin:     false,
+			Admin:     slices.Contains(adminEmails, email),
 		}
 		if err := h.db.Create(&newUser).Error; err != nil {
 			return fmt.Errorf("failed to create new user: %w", err)

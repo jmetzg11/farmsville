@@ -12,8 +12,6 @@
 	});
 </script>
 
-<h1>Welcome, {$user.name ? $user.name : $user.email ? $user.email : 'Guest'}</h1>
-
 <Items />
 
 <ClaimedItmes />
