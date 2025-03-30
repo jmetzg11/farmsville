@@ -2,8 +2,8 @@ package api
 
 import (
 	"farmsville/backend/models"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,18 +17,22 @@ func (h *Handler) GetItems(c *gin.Context) {
 		return
 	}
 
-	var claimedItems []models.ClaimedItemWithItemName
+	var claimedItems []models.ClaimedItemWithUserName
 	if err := h.db.Raw(`
-		SELECT
-			claimed_items.*,
-			items.name as item_name
-		FROM
-			claimed_items
-		JOIN
-			items ON claimed_items.item_id = items.id
-		WHERE
-			claimed_items.active = ?
-	`, true).Scan(&claimedItems).Error; err != nil {
+        SELECT
+            claimed_items.*,
+            items.name as item_name,
+            users.name as user_name,
+            users.email as user_email
+        FROM
+            claimed_items
+        JOIN
+            items ON claimed_items.item_id = items.id
+        JOIN
+            users ON claimed_items.user_id = users.id
+        WHERE
+            claimed_items.active = ?
+    `, true).Scan(&claimedItems).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch claimed items",
 		})
@@ -42,7 +46,6 @@ func (h *Handler) GetItems(c *gin.Context) {
 }
 
 func (h *Handler) MakeClaim(c *gin.Context) {
-	fmt.Println("MakeClaim")
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -50,8 +53,7 @@ func (h *Handler) MakeClaim(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(user)
-	currentUser, ok := user.(*models.User)
+	currentUser, ok := user.(models.User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to get user information",
@@ -59,19 +61,54 @@ func (h *Handler) MakeClaim(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(currentUser)
-
-	var claim models.Claim
-	if err := c.ShouldBindJSON(&claim); err != nil {
+	var claimRequest models.ClaimRequest
+	if err := c.ShouldBindJSON(&claimRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid request body",
 		})
 		return
 	}
 
-	fmt.Println(claim.ItemID, claim.Quantity)
+	var item models.Item
+	if err := h.db.First(&item, claimRequest.ItemID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Item not found",
+		})
+		return
+	}
+
+	if item.RemainingQty < claimRequest.Quantity {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Not enough items in stock",
+		})
+		return
+	}
+
+	item.RemainingQty -= claimRequest.Quantity
+	if err := h.db.Save(&item).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update item quantity",
+		})
+		return
+	}
+
+	claimedItem := models.ClaimedItem{
+		ItemID:    uint(claimRequest.ItemID),
+		UserID:    currentUser.ID,
+		Quantity:  claimRequest.Quantity,
+		CreatedAt: time.Now(),
+		Active:    true,
+	}
+
+	if err := h.db.Create(&claimedItem).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create claimed item",
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Claim made",
+		"message":  "Claim made",
+		"claim_id": claimedItem.ID,
 	})
 }

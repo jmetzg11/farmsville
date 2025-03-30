@@ -148,17 +148,11 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		return
 	}
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "fallback-secret-key"
-	}
-
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validate the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(jwtSecret), nil
+		return []byte("fallback-secret-key"), nil
 	})
 
 	if err != nil || !token.Valid {
@@ -179,7 +173,6 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			})
 			return
 		}
-
 		user, err := h.getUserByID(uint(userID))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{

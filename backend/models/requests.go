@@ -9,7 +9,7 @@ type AuthRequest struct {
 	Code  string `json:"code"`
 }
 
-type Claim struct {
+type ClaimRequest struct {
 	ItemID   int `json:"itemId"`
 	Quantity int `json:"quantity"`
 }

@@ -37,7 +37,6 @@ func NewHandler(db *gorm.DB, options ...interface{}) *Handler {
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("auth_token")
-		fmt.Println("tokenString", tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"success": false,
@@ -66,7 +65,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Check if the token is valid
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -84,7 +82,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			})
 			return
 		}
-
 		user, err := h.getUserByID(uint(userID))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{

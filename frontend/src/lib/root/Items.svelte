@@ -3,7 +3,7 @@
 	import AuthModal from '../reusable/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
 	import { formatDate } from './helpers.js';
-	let { items } = $props();
+	import { items } from '$lib/stores/items';
 	let showAuthModal = $state(false);
 	let showClaimModal = $state(false);
 	let selectedItem = $state(null);
@@ -21,7 +21,7 @@
 <div class="container mx-auto px-4 py-6">
 	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available</h2>
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
-		{#each items as item}
+		{#each $items as item}
 			<div
 				class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
 			>

@@ -3,6 +3,7 @@ package database
 import (
 	"farmsville/backend/models"
 	"log"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,6 +16,59 @@ func seedDB(db *gorm.DB) {
 		return
 	}
 
+	// Create sample users first
+	users := []models.User{
+		{
+			Email:     "john.doe@example.com",
+			Name:      "John Doe",
+			Admin:     false,
+			Code:      "user1code",
+			ExpiresAt: time.Now().AddDate(1, 0, 0), // Expires in 1 year
+			CreatedAt: time.Now(),
+		},
+		{
+			Email:     "jane.smith@example.com",
+			Name:      "Jane Smith",
+			Admin:     false,
+			Code:      "user2code",
+			ExpiresAt: time.Now().AddDate(1, 0, 0),
+			CreatedAt: time.Now(),
+		},
+		{
+			Email:     "mark.johnson@example.com",
+			Name:      "Mark Johnson",
+			Admin:     false,
+			Code:      "user3code",
+			ExpiresAt: time.Now().AddDate(1, 0, 0),
+			CreatedAt: time.Now(),
+		},
+		{
+			Email:     "sarah.williams@example.com",
+			Name:      "Sarah Williams",
+			Admin:     false,
+			Code:      "user4code",
+			ExpiresAt: time.Now().AddDate(1, 0, 0),
+			CreatedAt: time.Now(),
+		},
+		{
+			Email:     "robert.brown@example.com",
+			Name:      "Robert Brown",
+			Admin:     true, // Admin user
+			Code:      "admincode",
+			ExpiresAt: time.Now().AddDate(1, 0, 0),
+			CreatedAt: time.Now(),
+		},
+	}
+
+	// Insert users
+	for i := range users {
+		result := db.Create(&users[i])
+		if result.Error != nil {
+			log.Printf("Error creating user: %v", result.Error)
+		}
+	}
+
+	// Create items (same as before)
 	items := []models.Item{
 		{
 			Name:         "Organic Tomatoes",
@@ -61,37 +115,42 @@ func seedDB(db *gorm.DB) {
 		}
 	}
 
-	// Create sample claimed items
+	// Create sample claimed items with UserID instead of User email
 	claimedItems := []models.ClaimedItem{
 		{
-			ItemID:   1, // Organic Tomatoes
-			User:     "john.doe@example.com",
-			Quantity: 5,
-			Active:   true,
+			ItemID:    1, // Organic Tomatoes
+			UserID:    1, // John Doe
+			Quantity:  5,
+			CreatedAt: time.Now(),
+			Active:    true,
 		},
 		{
-			ItemID:   2, // Fresh Eggs
-			User:     "jane.smith@example.com",
-			Quantity: 2,
-			Active:   true,
+			ItemID:    2, // Fresh Eggs
+			UserID:    2, // Jane Smith
+			Quantity:  2,
+			CreatedAt: time.Now(),
+			Active:    true,
 		},
 		{
-			ItemID:   3, // Honey
-			User:     "mark.johnson@example.com",
-			Quantity: 1,
-			Active:   true,
+			ItemID:    3, // Honey
+			UserID:    3, // Mark Johnson
+			Quantity:  1,
+			CreatedAt: time.Now(),
+			Active:    true,
 		},
 		{
-			ItemID:   1, // Organic Tomatoes
-			User:     "sarah.williams@example.com",
-			Quantity: 3,
-			Active:   true,
+			ItemID:    1, // Organic Tomatoes
+			UserID:    4, // Sarah Williams
+			Quantity:  3,
+			CreatedAt: time.Now(),
+			Active:    true,
 		},
 		{
-			ItemID:   5, // Apples
-			User:     "robert.brown@example.com",
-			Quantity: 2,
-			Active:   true,
+			ItemID:    5, // Apples
+			UserID:    5, // Robert Brown
+			Quantity:  2,
+			CreatedAt: time.Now(),
+			Active:    true,
 		},
 	}
 

@@ -20,7 +20,7 @@ type Item struct {
 type ClaimedItem struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	ItemID    uint      `json:"item_id"`
-	User      string    `gorm:"size:255;not null" json:"user"`
+	UserID    uint      `json:"user_id"`
 	Quantity  int       `json:"quantity"`
 	CreatedAt time.Time `json:"created_at"`
 	Active    bool      `json:"active"`
@@ -34,4 +34,5 @@ type User struct {
 	Code      string
 	ExpiresAt time.Time
 	CreatedAt time.Time
+	Claims    []ClaimedItem `gorm:"foreignKey:UserID" json:"-"`
 }

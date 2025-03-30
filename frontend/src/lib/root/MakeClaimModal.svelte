@@ -1,7 +1,9 @@
 <script>
 	import { makeClaim, formatDate } from './helpers.js';
+	import { refreshItems } from '$lib/stores/items';
 	let { showClaimModal = $bindable(false), selectedItem = null } = $props();
 	let quantity = $state(1);
+
 	function closeModal() {
 		showClaimModal = false;
 	}
@@ -11,6 +13,7 @@
 		if (result) {
 			quantity = 1;
 			showClaimModal = false;
+			refreshItems();
 		} else {
 			throw new Error('Failed to make claim');
 		}

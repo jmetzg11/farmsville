@@ -1,0 +1,20 @@
+2025/03/30 07:21:49 Database already seeded
+Database connected successfully!
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/hello                --> farmsville/backend/routes.SetupAPIRoutes.func1 (5 handlers)
+[GIN-debug] GET    /api/items                --> farmsville/backend/api.(*Handler).GetItems-fm (5 handlers)
+[GIN-debug] POST   /api/auth                 --> farmsville/backend/api.(*Handler).SendAuth-fm (5 handlers)
+[GIN-debug] POST   /api/auth/verify          --> farmsville/backend/api.(*Handler).VerifyAuth-fm (5 handlers)
+[GIN-debug] GET    /api/auth/me              --> farmsville/backend/api.(*Handler).AuthMe-fm (5 handlers)
+[GIN-debug] POST   /api/items/claim          --> farmsville/backend/api.(*Handler).MakeClaim-fm (6 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :3000
+[GIN] 2025/03/30 - 07:21:59 | 200 |   27.879461ms |             ::1 | POST     "/api/items/claim"
+[GIN] 2025/03/30 - 07:22:01 | 200 |     673.649µs |             ::1 | GET      "/api/items"
+[GIN] 2025/03/30 - 07:22:01 | 200 |     203.471µs |             ::1 | GET      "/api/auth/me"

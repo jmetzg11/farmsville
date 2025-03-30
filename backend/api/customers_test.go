@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -33,7 +35,7 @@ func setupCustomersDB(t *testing.T) *gorm.DB {
 		sqlDB.Close()
 	})
 
-	err = db.AutoMigrate(&models.Item{}, &models.ClaimedItem{})
+	err = db.AutoMigrate(&models.Item{}, &models.ClaimedItem{}, &models.User{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,6 +48,19 @@ func setupCustomersRouter(handler *Handler) *gin.Engine {
 
 	router.GET("/items", handler.GetItems)
 
+	// authGroup := router.Group("/")
+	// authGroup.Use(func(c *gin.Context) {
+	// 	user := models.User{
+	// 		ID:    1,
+	// 		Name:  "Test User",
+	// 		Email: "testuser@example.com",
+	// 	}
+	// 	c.Set("user", user)
+	// 	c.Next()
+	// })
+
+	// authGroup.POST("/claim", handler.MakeClaim)
+
 	return router
 }
 
@@ -55,6 +70,19 @@ func TestGetItems(t *testing.T) {
 	db := setupCustomersDB(t)
 	handler := NewHandler(db)
 	router := setupCustomersRouter(handler)
+
+	user1 := models.User{
+		Name:  "User One",
+		Email: "user1@example.com",
+	}
+
+	user2 := models.User{
+		Name:  "User Two",
+		Email: "user2@example.com",
+	}
+
+	db.Create(&user1)
+	db.Create(&user2)
 
 	item1 := models.Item{
 		Name:         "Test Item 1",
@@ -86,14 +114,14 @@ func TestGetItems(t *testing.T) {
 
 	claimedItem1 := models.ClaimedItem{
 		ItemID:   item1.ID,
-		User:     "user1@example.com",
+		UserID:   user1.ID,
 		Quantity: 10,
 		Active:   true,
 	}
 
 	claimedItem2 := models.ClaimedItem{
 		ItemID:   item1.ID,
-		User:     "user2@example.com",
+		UserID:   user2.ID,
 		Quantity: 10,
 		Active:   false,
 	}
@@ -133,23 +161,117 @@ func TestGetItems(t *testing.T) {
 		t.Errorf("Expected 1 claimed items (only active ones), got %d", len(claimedItems))
 	}
 
-	// Verify that the claimed item contains the item_name field
+	// Verify that the claimed item contains all the required fields
 	if len(claimedItems) > 0 {
 		claimedItem, ok := claimedItems[0].(map[string]interface{})
 		if !ok {
 			t.Fatalf("Expected claimed item to be a map")
 		}
 
+		// Check for item_name field
 		itemName, exists := claimedItem["item_name"]
 		if !exists {
 			t.Errorf("Expected claimed item to have 'item_name' field")
+		} else if itemName != "Test Item 1" {
+			t.Errorf("Expected item_name to be 'Test Item 1', got '%v'", itemName)
 		}
 
-		// Check that the item_name matches the expected value
-		expectedName := "Test Item 1"
-		if itemName != expectedName {
-			t.Errorf("Expected item_name to be '%s', got '%v'", expectedName, itemName)
+		// Check for user_name field
+		userName, exists := claimedItem["user_name"]
+		if !exists {
+			t.Errorf("Expected claimed item to have 'user_name' field")
+		} else if userName != "User One" {
+			t.Errorf("Expected user_name to be 'User One', got '%v'", userName)
+		}
+
+		// Check for user_email field
+		userEmail, exists := claimedItem["user_email"]
+		if !exists {
+			t.Errorf("Expected claimed item to have 'user_email' field")
+		} else if userEmail != "user1@example.com" {
+			t.Errorf("Expected user_email to be 'user1@example.com', got '%v'", userEmail)
 		}
 	}
 
+}
+
+func TestMakeClaim(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupCustomersDB(t)
+	handler := NewHandler(db)
+
+	// Create a test user in the database
+	testUser := models.User{
+		Name:  "Test User",
+		Email: "testuser@example.com",
+	}
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	router := gin.New()
+
+	authGroup := router.Group("/")
+	authGroup.Use(handler.AuthMiddleware()) // Use the real auth middleware
+	authGroup.POST("/claim", handler.MakeClaim)
+
+	item := models.Item{
+		Name:         "Test Item",
+		Description:  "Item for claiming",
+		Quantity:     100,
+		RemainingQty: 100,
+		Active:       true,
+	}
+	db.Create(&item)
+
+	initialQty := item.RemainingQty
+
+	claimQty := 10
+	requestBody, _ := json.Marshal(models.ClaimRequest{
+		ItemID:   int(item.ID),
+		Quantity: claimQty,
+	})
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": float64(testUser.ID),
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte("fallback-secret-key"))
+	if err != nil {
+		t.Fatalf("Failed to sign test token: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/claim", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d", http.StatusOK, w.Code)
+	}
+
+	var updatedItem models.Item
+	if err := db.First(&updatedItem, item.ID).Error; err != nil {
+		t.Fatalf("Failed to fetch updated item: %v", err)
+	}
+	expectedQty := initialQty - claimQty
+	if updatedItem.RemainingQty != expectedQty {
+		t.Errorf("Expected remaining quantity to be %d, got %d", expectedQty, updatedItem.RemainingQty)
+	}
+
+	var claimedItems []models.ClaimedItem
+	if err := db.Where("item_id = ?", item.ID).Find(&claimedItems).Error; err != nil {
+		t.Fatalf("Failed to fetch claimed items: %v", err)
+	}
+	if len(claimedItems) != 1 {
+		t.Errorf("Expected 1 claimed item, got %d", len(claimedItems))
+	}
 }
