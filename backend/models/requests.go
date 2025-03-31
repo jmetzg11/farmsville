@@ -17,3 +17,9 @@ type ClaimRequest struct {
 type ItemRequest struct {
 	ID int `json:"id"`
 }
+
+type CreateItemRequest struct {
+	Name        string `json:"title" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Quantity    int    `json:"quantity" binding:"required"`
+}

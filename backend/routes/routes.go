@@ -41,6 +41,8 @@ func SetupAPIRoutes(router *gin.Engine) {
 		{
 			adminRoutes.POST("/items/update", handler.UpdateItem)
 			adminRoutes.POST("/items/remove", handler.RemoveItem)
+			adminRoutes.POST("/items/create", handler.CreateItem)
+			adminRoutes.POST("/claimed-item/remove", handler.RemoveClaimedItem)
 		}
 	}
 }

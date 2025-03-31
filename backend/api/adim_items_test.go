@@ -84,7 +84,6 @@ func TestRemoveItem(t *testing.T) {
 	db := setupTestDB(t)
 	handler := NewHandler(db)
 
-	// Create test user
 	testUser := models.User{
 		Name:  "Test User",
 		Email: "testuser@example.com",
@@ -96,7 +95,6 @@ func TestRemoveItem(t *testing.T) {
 
 	router := setUpTestRouter(handler)
 
-	// Create test item
 	item := models.Item{
 		Name:         "Test Item",
 		Description:  "Item for removal test",
@@ -106,7 +104,6 @@ func TestRemoveItem(t *testing.T) {
 	}
 	db.Create(&item)
 
-	// Create a claimed item associated with the test item
 	claimedItem := models.ClaimedItem{
 		ItemID:   item.ID,
 		UserID:   testUser.ID,
@@ -115,18 +112,15 @@ func TestRemoveItem(t *testing.T) {
 	}
 	db.Create(&claimedItem)
 
-	// Create request body
 	requestBody, _ := json.Marshal(models.ItemRequest{
 		ID: int(item.ID),
 	})
 
-	// Get test user token
 	tokenString, err := getTestUserToken(testUser)
 	if err != nil {
 		t.Fatalf("Failed to get test user token: %v", err)
 	}
 
-	// Make the request
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/items/remove", bytes.NewBuffer(requestBody))
 	req.Header.Set("Content-Type", "application/json")
@@ -137,12 +131,10 @@ func TestRemoveItem(t *testing.T) {
 
 	router.ServeHTTP(w, req)
 
-	// Check response status
 	if w.Code != http.StatusOK {
 		t.Fatalf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// Verify the item was deactivated in the database
 	var updatedItem models.Item
 	if err := db.First(&updatedItem, item.ID).Error; err != nil {
 		t.Fatalf("Failed to fetch updated item: %v", err)
@@ -151,12 +143,145 @@ func TestRemoveItem(t *testing.T) {
 		t.Fatalf("Item was not deactivated in the database")
 	}
 
-	// Verify the claimed item was deactivated in the database
 	var updatedClaimedItem models.ClaimedItem
 	if err := db.First(&updatedClaimedItem, claimedItem.ID).Error; err != nil {
 		t.Fatalf("Failed to fetch updated claimed item: %v", err)
 	}
 	if updatedClaimedItem.Active {
 		t.Fatalf("Claimed item was not deactivated in the database")
+	}
+}
+
+func TestCreateItem(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+
+	testUser := models.User{
+		Name:  "Test User",
+		Email: "testuser@example.com",
+		Admin: true,
+	}
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	router := setUpTestRouter(handler)
+
+	newItem := models.CreateItemRequest{
+		Name:        "Test Item",
+		Description: "Item for creation test",
+		Quantity:    100,
+	}
+	requestBody, _ := json.Marshal(newItem)
+
+	tokenString, err := getTestUserToken(testUser)
+	if err != nil {
+		t.Fatalf("Failed to get test user token: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/items/create", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d", http.StatusOK, w.Code)
+	}
+
+	var createdItem models.Item
+	if err := db.First(&createdItem, "name = ?", newItem.Name).Error; err != nil {
+		t.Fatalf("Failed to fetch created item: %v", err)
+	}
+
+	if createdItem.Name != newItem.Name ||
+		createdItem.Description != newItem.Description ||
+		createdItem.Quantity != newItem.Quantity {
+		t.Fatalf("Item was not created correctly in the database")
+	}
+}
+
+func TestRemoveClaimedItem(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+
+	testUser := models.User{
+		Name:  "Test User",
+		Email: "testuser@example.com",
+		Admin: true,
+	}
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	router := setUpTestRouter(handler)
+
+	testItem := models.Item{
+		Name:         "Test Item",
+		Description:  "Test Description",
+		Quantity:     10,
+		RemainingQty: 5,
+		Active:       true,
+	}
+	if err := db.Create(&testItem).Error; err != nil {
+		t.Fatalf("Failed to create test item: %v", err)
+	}
+
+	testClaimedItem := models.ClaimedItem{
+		ItemID:   testItem.ID,
+		UserID:   testUser.ID,
+		Quantity: 3,
+		Active:   true,
+	}
+	if err := db.Create(&testClaimedItem).Error; err != nil {
+		t.Fatalf("Failed to create test claimed item: %v", err)
+	}
+
+	claimedItemRequest := models.ItemRequest{
+		ID: int(testClaimedItem.ID),
+	}
+	requestBody, _ := json.Marshal(claimedItemRequest)
+
+	tokenString, err := getTestUserToken(testUser)
+	if err != nil {
+		t.Fatalf("Failed to get test user token: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/claimed-item/remove", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	var updatedItem models.Item
+	if err := db.First(&updatedItem, testItem.ID).Error; err != nil {
+		t.Fatalf("Failed to fetch updated item: %v", err)
+	}
+
+	expectedQuantity := testItem.RemainingQty + testClaimedItem.Quantity
+	if updatedItem.RemainingQty != expectedQuantity {
+		t.Fatalf("Expected item quantity to be %d, got %d", expectedQuantity, updatedItem.RemainingQty)
+	}
+
+	var deletedItem models.ClaimedItem
+	result := db.First(&deletedItem, testClaimedItem.ID)
+	if result.Error == nil {
+		t.Fatalf("Expected claimed item to be deleted, but it still exists")
 	}
 }

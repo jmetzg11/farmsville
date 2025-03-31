@@ -49,8 +49,11 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	adminGroup.Use(handler.AdminMiddleware())
 
 	// admin
-	adminGroup.POST("items/update", handler.UpdateItem)
-	adminGroup.POST("items/remove", handler.RemoveItem)
+	adminGroup.POST("/items/update", handler.UpdateItem)
+	adminGroup.POST("/items/remove", handler.RemoveItem)
+	adminGroup.POST("/items/create", handler.CreateItem)
+	adminGroup.POST("/claimed-item/remove", handler.RemoveClaimedItem)
+
 	// customers
 	router.GET("/items", handler.GetItems)
 	authGroup.POST("/claim", handler.MakeClaim)
