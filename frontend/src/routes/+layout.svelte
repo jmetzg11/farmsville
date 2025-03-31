@@ -6,9 +6,9 @@
 
 <div class="min-h-screen flex flex-col">
 	<header class="bg-teal-500 text-white shadow-md">
-		<div class="container mx-auto px-4 py-3 flex justify-between items-center">
+		<div class="container mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center">
 			<div class="text-xl font-bold">
-				Welcome, {$user.name ? $user.name : $user.email ? $user.email : 'Guest'}
+				Welcome, {$user.name ? $user.name : $user.email ? $user.email.split('@')[0] : 'Guest'}
 			</div>
 			<nav>
 				<ul class="flex space-x-6">

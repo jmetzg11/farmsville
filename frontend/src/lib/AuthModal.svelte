@@ -1,6 +1,6 @@
 <script>
 	import { setUser } from '$lib/stores/auth';
-	let { showAuthModal = $bindable(false), showClaimModal = $bindable(false) } = $props();
+	let { showAuthModal = $bindable(false) } = $props();
 	let email = $state('');
 	let code = $state('');
 	let status = $state('start');
@@ -65,7 +65,6 @@
 				const data = await response.json();
 				setUser(data.user);
 				closeModal();
-				showClaimModal = true;
 			} else {
 				status = 'error';
 			}
@@ -103,7 +102,7 @@
 					transition-colors duration-200
 					{isEmailValid ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'}"
 					>
-						Send Login Link
+						Send Code
 					</button>
 					<button
 						onclick={closeModal}

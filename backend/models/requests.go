@@ -13,3 +13,7 @@ type ClaimRequest struct {
 	ItemID   int `json:"itemId"`
 	Quantity int `json:"quantity"`
 }
+
+type ItemRequest struct {
+	ID int `json:"id"`
+}

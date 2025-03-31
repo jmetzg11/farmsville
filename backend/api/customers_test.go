@@ -4,72 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
-
-func setupCustomersDB(t *testing.T) *gorm.DB {
-	// Create a unique name for this in-memory database instance
-	// Each test will get its own isolated database
-	dbID := fmt.Sprintf("file:memdb%d?mode=memory&cache=shared", time.Now().UnixNano())
-
-	db, err := gorm.Open(sqlite.Open(dbID), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Cleanup(func() {
-		sqlDB.Close()
-	})
-
-	err = db.AutoMigrate(&models.Item{}, &models.ClaimedItem{}, &models.User{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return db
-}
-
-func setupCustomersRouter(handler *Handler) *gin.Engine {
-	router := gin.New()
-
-	router.GET("/items", handler.GetItems)
-
-	// authGroup := router.Group("/")
-	// authGroup.Use(func(c *gin.Context) {
-	// 	user := models.User{
-	// 		ID:    1,
-	// 		Name:  "Test User",
-	// 		Email: "testuser@example.com",
-	// 	}
-	// 	c.Set("user", user)
-	// 	c.Next()
-	// })
-
-	// authGroup.POST("/claim", handler.MakeClaim)
-
-	return router
-}
 
 func TestGetItems(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	db := setupCustomersDB(t)
+	db := setupTestDB(t)
 	handler := NewHandler(db)
-	router := setupCustomersRouter(handler)
+
+	router := setUpTestRouter(handler)
 
 	user1 := models.User{
 		Name:  "User One",
@@ -198,7 +146,7 @@ func TestGetItems(t *testing.T) {
 func TestMakeClaim(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	db := setupCustomersDB(t)
+	db := setupTestDB(t)
 	handler := NewHandler(db)
 
 	// Create a test user in the database
@@ -210,11 +158,7 @@ func TestMakeClaim(t *testing.T) {
 		t.Fatalf("Failed to create test user: %v", err)
 	}
 
-	router := gin.New()
-
-	authGroup := router.Group("/")
-	authGroup.Use(handler.AuthMiddleware()) // Use the real auth middleware
-	authGroup.POST("/claim", handler.MakeClaim)
+	router := setUpTestRouter(handler)
 
 	item := models.Item{
 		Name:         "Test Item",
@@ -233,20 +177,14 @@ func TestMakeClaim(t *testing.T) {
 		Quantity: claimQty,
 	})
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": float64(testUser.ID),
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte("fallback-secret-key"))
+	tokenString, err := getTestUserToken(testUser)
 	if err != nil {
-		t.Fatalf("Failed to sign test token: %v", err)
+		t.Fatalf("Failed to get test user token: %v", err)
 	}
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/claim", bytes.NewBuffer(requestBody))
 	req.Header.Set("Content-Type", "application/json")
-
 	req.AddCookie(&http.Cookie{
 		Name:  "auth_token",
 		Value: tokenString,

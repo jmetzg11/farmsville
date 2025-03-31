@@ -21,7 +21,6 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.GET("/hello", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "Hello from Go!"})
 		})
-		// admin
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
 		// users
@@ -34,6 +33,14 @@ func SetupAPIRoutes(router *gin.Engine) {
 		{
 			// customers
 			authRoutes.POST("/items/claim", handler.MakeClaim)
+		}
+
+		// admin
+		adminRoutes := apiRouter.Group("/")
+		adminRoutes.Use(handler.AdminMiddleware())
+		{
+			adminRoutes.POST("/items/update", handler.UpdateItem)
+			adminRoutes.POST("/items/remove", handler.RemoveItem)
 		}
 	}
 }

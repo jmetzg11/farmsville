@@ -1,25 +1,18 @@
 <script>
-	import { user } from '$lib/stores/auth';
-	import AuthModal from '$lib/AuthModal.svelte';
-	import MakeClaimModal from './MakeClaimModal.svelte';
-	import { formatDate } from './helpers.js';
 	import { items } from '$lib/stores/items';
-	let showAuthModal = $state(false);
-	let showClaimModal = $state(false);
+	import { formatDate } from '$lib/root/helpers';
+	import EditItemModal from './EditItemModal.svelte';
 	let selectedItem = $state(null);
+	let showModal = $state(false);
 
 	function handleClick(item) {
 		selectedItem = item;
-		if ($user.isAuthenticated) {
-			showClaimModal = true;
-		} else {
-			showAuthModal = true;
-		}
+		showModal = true;
 	}
 </script>
 
 <div class="container mx-auto px-4 py-6">
-	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available</h2>
+	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available (Admin)</h2>
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
 		{#each $items as item}
 			<div
@@ -47,7 +40,7 @@
 							onclick={() => handleClick(item)}
 							class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
 						>
-							{item.remaining_quantity <= 0 ? 'Out of Stock' : 'Claim'}
+							Edit
 						</button>
 					</div>
 				</div>
@@ -56,6 +49,4 @@
 	</div>
 </div>
 
-<AuthModal bind:showAuthModal />
-
-<MakeClaimModal bind:showClaimModal {selectedItem} />
+<EditItemModal bind:showModal {selectedItem} />

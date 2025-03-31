@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,8 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 type MockAuthService struct{}
@@ -30,49 +27,14 @@ func (m *MockAuthService) GenerateJWT(user models.User) (string, error) {
 	return "jwt_token_123", nil
 }
 
-func setupUsersDB(t *testing.T) *gorm.DB {
-	// Create a unique name for this in-memory database instance
-	dbID := fmt.Sprintf("file:memdb%d?mode=memory&cache=shared", time.Now().UnixNano())
-
-	db, err := gorm.Open(sqlite.Open(dbID), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Cleanup(func() {
-		sqlDB.Close()
-	})
-
-	err = db.AutoMigrate(&models.User{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return db
-}
-
-func setupUsersRouter(handler *Handler) *gin.Engine {
-	router := gin.New()
-
-	router.POST("/auth/send", handler.SendAuth)
-	router.POST("/auth/verify", handler.VerifyAuth)
-	router.GET("/auth/me", handler.AuthMe)
-	return router
-}
-
 func TestSendAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	// Setup database and handler
-	db := setupUsersDB(t)
+	db := setupTestDB(t)
 	mockAuth := &MockAuthService{}
 	handler := NewHandler(db, mockAuth)
-	router := setupUsersRouter(handler)
+	router := setUpTestRouter(handler)
 
 	// Create request body
 	reqBody := map[string]string{
@@ -125,10 +87,10 @@ func TestSendAuth(t *testing.T) {
 func TestAuthMe(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	db := setupUsersDB(t)
+	db := setupTestDB(t)
 	mockAuth := &MockAuthService{}
 	handler := NewHandler(db, mockAuth)
-	router := setupUsersRouter(handler)
+	router := setUpTestRouter(handler)
 
 	testUser := models.User{
 		Name:  "Test User",
@@ -195,10 +157,10 @@ func TestAuthMe(t *testing.T) {
 func TestAuthMeInvalidToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	db := setupUsersDB(t)
+	db := setupTestDB(t)
 	mockAuth := &MockAuthService{}
 	handler := NewHandler(db, mockAuth)
-	router := setupUsersRouter(handler)
+	router := setUpTestRouter(handler)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/auth/me", nil)

@@ -3,7 +3,6 @@
 	import { initializeUserStore } from '$lib/stores/auth';
 	import Items from '$lib/root/Items.svelte';
 	import ClaimedItmes from '$lib/root/ClaimedItmes.svelte';
-	import { user } from '$lib/stores/auth';
 	import { refreshItems } from '$lib/stores/items';
 
 	onMount(() => {
