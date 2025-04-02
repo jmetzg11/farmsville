@@ -6,6 +6,7 @@ import (
 	"farmsville/backend/models"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -104,7 +105,11 @@ func TestAuthMe(t *testing.T) {
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte("fallback-secret-key"))
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "fallback-secret-key"
+	}
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		t.Fatalf("Failed to sign test token: %v", err)
 	}

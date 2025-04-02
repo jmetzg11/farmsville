@@ -73,10 +73,6 @@ func SendEmailWithAuthCode(toEmail, code string) error {
 }
 
 func GenerateJWT(user models.User) (string, error) {
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "fallback-secret-key" // Only use in development
-	}
 
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
@@ -87,6 +83,10 @@ func GenerateJWT(user models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "fallback-secret-key" // Only use in development
+	}
 	tokenString, err := token.SignedString([]byte(jwtSecret))
 	return tokenString, err
 }

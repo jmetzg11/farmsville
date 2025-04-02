@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,7 +47,6 @@ func TestUpdateItem(t *testing.T) {
 	requestBody, _ := json.Marshal(updatedItem)
 
 	tokenString, err := getTestUserToken(testUser)
-	fmt.Println("tokenString", tokenString)
 	if err != nil {
 		t.Fatalf("Failed to get test user token: %v", err)
 	}
