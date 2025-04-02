@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -47,6 +48,7 @@ func TestUpdateItem(t *testing.T) {
 	requestBody, _ := json.Marshal(updatedItem)
 
 	tokenString, err := getTestUserToken(testUser)
+	fmt.Println("tokenString", tokenString)
 	if err != nil {
 		t.Fatalf("Failed to get test user token: %v", err)
 	}
@@ -60,13 +62,13 @@ func TestUpdateItem(t *testing.T) {
 	})
 	router.ServeHTTP(w, req)
 
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d", http.StatusOK, w.Code)
+	}
+
 	var updatedItemFromDB models.Item
 	if err := db.First(&updatedItemFromDB, item.ID).Error; err != nil {
 		t.Fatalf("Failed to fetch updated item: %v", err)
-	}
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
 	if updatedItemFromDB.Name != updatedItem.Name ||

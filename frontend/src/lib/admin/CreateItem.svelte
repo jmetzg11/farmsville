@@ -16,7 +16,8 @@
 		newItem = { ...DEFAULT_ITEM };
 	}
 
-	$: isFormValid = newItem.title.trim() !== '' && newItem.quantity > 0;
+	$: isFormValid =
+		newItem.title.trim() !== '' && newItem.description.trim() !== '' && newItem.quantity > 0;
 </script>
 
 <div class="container mx-auto px-4 py-6">

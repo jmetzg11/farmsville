@@ -3,6 +3,7 @@ package api
 import (
 	"farmsville/backend/models"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -71,7 +72,11 @@ func getTestUserToken(testUser models.User) (string, error) {
 		"user_id": float64(testUser.ID),
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
 	})
-	tokenString, err := token.SignedString([]byte("fallback-secret-key"))
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "fallback-secret-key"
+	}
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", err
 	}

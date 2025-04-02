@@ -1,9 +1,13 @@
-# Multi-stage build for Go application with frontend
 FROM node:alpine AS frontend-builder
 WORKDIR /app/frontend
+# Copy package files first to leverage caching
 COPY frontend/package*.json ./
 RUN npm install
-COPY frontend/ ./
+# Only then copy source files (this helps with caching when only source changes)
+COPY frontend/src ./src
+COPY frontend/public ./public
+# Copy only necessary config files
+COPY frontend/*.js frontend/*.json ./
 RUN npm run build
 
 FROM golang:1.23-alpine AS go-builder
