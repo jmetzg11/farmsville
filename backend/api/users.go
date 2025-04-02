@@ -156,9 +156,12 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte("fallback-secret-key"), nil
+		jwtSecret := os.Getenv("JWT_SECRET")
+		if jwtSecret == "" {
+			jwtSecret = "fallback-secret-key"
+		}
+		return []byte(jwtSecret), nil
 	})
-
 	if err != nil || !token.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -166,7 +169,6 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		})
 		return
 	}
-
 	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID, ok := claims["user_id"].(float64)
@@ -191,7 +193,6 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"email": user.Email,
 			"admin": user.Admin,
 		}
-
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
 			"message": "Authentication successful",
