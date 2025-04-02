@@ -160,7 +160,6 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		if jwtSecret == "" {
 			jwtSecret = "fallback-secret-key"
 		}
-		fmt.Println("jwtSecret", jwtSecret)
 		return []byte(jwtSecret), nil
 	})
 	if err != nil || !token.Valid {
@@ -194,7 +193,6 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"email": user.Email,
 			"admin": user.Admin,
 		}
-		fmt.Println("returnUser", returnUser)
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
 			"message": "Authentication successful",
