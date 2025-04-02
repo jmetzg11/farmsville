@@ -19,7 +19,9 @@
 						</span>
 					</div>
 					<div class="flex justify-between items-center text-sm text-gray-600 mt-4">
-						<span class="font-medium">{item.user_name ? item.user_name : item.user_email}</span>
+						<span class="font-medium"
+							>{item.user_name ? item.user_name : item.user_email.split('@')[0]}</span
+						>
 						<span class="text-gray-500">{formatDate(item.created_at)}</span>
 					</div>
 				</div>

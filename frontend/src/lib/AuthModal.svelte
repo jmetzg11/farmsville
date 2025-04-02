@@ -85,7 +85,7 @@
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
 			{#if status === 'start'}
 				<p class="text-gray-600 mb-4">
-					Enter your email address and we'll send you a login link. It'll come from Helen's son's
+					Enter your email address and we'll send you a 6 digit code. It'll come from Helen's son's
 					account (jmetzg11) and expire in 15 minutes.
 				</p>
 				<input
