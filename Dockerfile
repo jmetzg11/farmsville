@@ -5,7 +5,7 @@ COPY frontend/package*.json ./
 RUN npm install
 # Only then copy source files (this helps with caching when only source changes)
 COPY frontend/src ./src
-COPY frontend/public ./public
+# COPY frontend/public ./public
 # Copy only necessary config files
 COPY frontend/*.js frontend/*.json ./
 RUN npm run build
