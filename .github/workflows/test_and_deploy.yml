@@ -21,6 +21,22 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Debug environment variables
+        run: |
+          if [ -n "$GMAIL_USER" ]; then
+            echo "GMAIL_USER is set (value hidden)"
+          else
+            echo "GMAIL_USER is NOT set"
+          fi
+          if [ -n "$GMAIL_PASS" ]; then
+            echo "GMAIL_PASS is set (value hidden)"
+          else
+            echo "GMAIL_PASS is NOT set"
+          fi
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+
       - name: Run tests
         run: go test -v ./...
         env:

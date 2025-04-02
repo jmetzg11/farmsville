@@ -35,7 +35,7 @@ func TestDefaultService(t *testing.T) {
 
 	t.Run("SendEmailWithAuthCode", func(t *testing.T) {
 		if os.Getenv("GMAIL_USER") == "" || os.Getenv("GMAIL_PASS") == "" {
-			t.Fatalf("Environment variables are not not set")
+			t.Fatalf("Environment variables are not set")
 		}
 
 		err := service.SendEmailWithAuthCode(os.Getenv("GMAIL_USER"), "123456")
