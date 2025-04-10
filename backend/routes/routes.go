@@ -21,6 +21,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.GET("/hello", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "Hello from Go!"})
 		})
+		apiRouter.GET("/show_auth", handler.ShowAuth)
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
 		// users

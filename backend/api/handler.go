@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -173,4 +174,11 @@ func (h *Handler) getUserByID(id uint) (models.User, error) {
 	var user models.User
 	result := h.db.First(&user, id)
 	return user, result.Error
+}
+
+func (h *Handler) ShowAuth(c *gin.Context) {
+	adminEmails := strings.Split(os.Getenv("ADMIN_EMAILS"), ",")
+	c.JSON(http.StatusOK, gin.H{
+		"message": adminEmails,
+	})
 }
