@@ -178,6 +178,9 @@ func (h *Handler) getUserByID(id uint) (models.User, error) {
 
 func (h *Handler) ShowAuth(c *gin.Context) {
 	adminEmails := strings.Split(os.Getenv("ADMIN_EMAILS"), ",")
+	for i, email := range adminEmails {
+		adminEmails[i] = strings.TrimSpace(email)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": adminEmails,
 	})
