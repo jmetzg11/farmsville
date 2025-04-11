@@ -63,6 +63,9 @@ func (h *Handler) updateOrCreateUser(email, code string) error {
 	} else if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		// User does not exist, create a new one
 		adminEmails := strings.Split(os.Getenv("ADMIN_EMAILS"), ",")
+		for i, email := range adminEmails {
+			adminEmails[i] = strings.TrimSpace(email)
+		}
 
 		newUser := models.User{
 			Email:     email,
