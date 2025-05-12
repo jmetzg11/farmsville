@@ -3,7 +3,6 @@ package api
 import (
 	"farmsville/backend/models"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -43,9 +42,12 @@ func setupTestDB(t *testing.T) *gorm.DB {
 }
 
 func setUpTestRouter(handler *Handler) *gin.Engine {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// Try to load env, but don't fail tests if not found
+	_ = godotenv.Load("../../.env")
+
+	// Set defaults for required environment variables in tests
+	if os.Getenv("JWT_SECRET") == "" {
+		os.Setenv("JWT_SECRET", "test-jwt-secret")
 	}
 
 	router := gin.New()
