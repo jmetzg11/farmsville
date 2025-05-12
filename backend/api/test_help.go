@@ -60,6 +60,7 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 
 	// admin
 	adminGroup.GET("/users", handler.GetUsers)
+	adminGroup.POST("/users/update", handler.UpdateUser)
 	adminGroup.POST("/users/create", handler.CreateUser)
 	adminGroup.POST("/items/update", handler.UpdateItem)
 	adminGroup.POST("/items/remove", handler.RemoveItem)

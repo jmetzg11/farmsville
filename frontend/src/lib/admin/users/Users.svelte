@@ -28,19 +28,18 @@
 	onMount(async () => {
 		await refreshUsers();
 	});
-
-	$effect(() => {
-		$inspect(users);
-	});
 </script>
 
 <AddUser bind:showAddModal />
-<EditUser bind:showEditModal />
+<EditUser bind:showEditModal bind:formDetails />
 <DeleteUser bind:showDeleteModal />
+
 <button
-	class="px-4 py-2 border bg-green-400 rounded-md hover:bg-green-500 cursor-pointer"
-	onclick={showAddUser}>Add User</button
+	class="px-4 py-2 bg-teal-500 text-white font-medium rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-50 shadow-sm transition-colors duration-200 cursor-pointer mb-4"
+	onclick={showAddUser}
 >
+	Add User
+</button>
 
 <table class="min-w-full divide-y divide-gray-200">
 	<thead>

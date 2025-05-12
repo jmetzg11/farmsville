@@ -4,7 +4,6 @@ export const users = writable([]);
 
 export async function refreshUsers() {
 	const freshUsers = await getUsers();
-	console.log(freshUsers);
 	users.set(freshUsers);
 }
 
@@ -24,7 +23,6 @@ export async function getUsers() {
 		}
 
 		const data = await response.json();
-		console.log(data);
 		return data;
 	} catch (error) {
 		console.error('Error fetching items', error);
@@ -43,7 +41,27 @@ export async function createUser(user) {
 			body: JSON.stringify(user),
 			credentials: 'include'
 		});
-		refreshUsers();
+		await refreshUsers();
+		return true;
+	} catch (error) {
+		console.error('Error creating user', error);
+		return false;
+	}
+}
+
+export async function updateUser(user) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/users/update`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(user),
+			credentials: 'include'
+		});
+		await refreshUsers();
+		return true;
 	} catch (error) {
 		console.error('Error creating user', error);
 		return false;

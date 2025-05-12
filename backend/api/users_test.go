@@ -99,6 +99,101 @@ func TestGetUsers(t *testing.T) {
 	}
 }
 
+func TestUpdateUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+	router := setUpTestRouter(handler)
+
+	adminUser := models.User{
+		Name:  "Admin User",
+		Email: "admin@example.com",
+		Admin: true,
+	}
+
+	if err := db.Create(&adminUser).Error; err != nil {
+		t.Fatalf("Failed to create admin user: %v", err)
+	}
+
+	tokenString, err := getTestUserToken(adminUser)
+	if err != nil {
+		t.Fatalf("Failed to get test user token: %v", err)
+	}
+
+	testUser := models.User{
+		Name:  "Test User",
+		Email: "test@example.com",
+		Phone: "555-555-5555",
+		Admin: false,
+	}
+
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	updateRequest := models.UpdateUserRequest{
+		ID:    int(testUser.ID),
+		Name:  "Updated Name",
+		Email: "updated@example.com",
+		Phone: "777-777-7777",
+		Admin: true,
+	}
+
+	requestBody, err := json.Marshal(updateRequest)
+	if err != nil {
+		t.Fatalf("Failed to marshal request: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/users/update", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		t.Fatalf("Expected success to be true, got %v", response["success"])
+	}
+
+	if message, ok := response["message"].(string); !ok || message != "User updated" {
+		t.Fatalf("Expected message to be 'User updated', got %v", response["message"])
+	}
+
+	// Verify the user was actually updated in the database
+	var updatedUser models.User
+	result := db.First(&updatedUser, testUser.ID)
+	if result.Error != nil {
+		t.Fatalf("Failed to find updated user in database: %v", result.Error)
+	}
+
+	if updatedUser.Name != updateRequest.Name {
+		t.Errorf("Expected name %s, got %s", updateRequest.Name, updatedUser.Name)
+	}
+	if updatedUser.Email != updateRequest.Email {
+		t.Errorf("Expected email %s, got %s", updateRequest.Email, updatedUser.Email)
+	}
+	if updatedUser.Phone != updateRequest.Phone {
+		t.Errorf("Expected phone %s, got %s", updateRequest.Phone, updatedUser.Phone)
+	}
+	if updatedUser.Admin != updateRequest.Admin {
+		t.Errorf("Expected admin %v, got %v", updateRequest.Admin, updatedUser.Admin)
+	}
+}
+
 func TestCreateUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

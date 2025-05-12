@@ -29,3 +29,11 @@ type CreateUserRequest struct {
 	Email string `json:"email"`
 	Phone string `json:"phone"`
 }
+
+type UpdateUserRequest struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+	Admin bool   `json:"admin"`
+}
