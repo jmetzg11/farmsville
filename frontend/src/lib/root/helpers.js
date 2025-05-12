@@ -1,5 +1,4 @@
 export async function makeClaim(itemId, quantity) {
-	console.log(itemId, quantity);
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/claim`;
 		console.log(url);

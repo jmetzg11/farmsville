@@ -1,5 +1,5 @@
 <script>
-	import { formatDate } from '../root/helpers.js';
+	import { formatDate } from '../../root/helpers.js';
 	import { claimedItems } from '$lib/stores/items';
 	import { removeClaimedItem } from './helpers.js';
 	import { refreshItems } from '$lib/stores/items';

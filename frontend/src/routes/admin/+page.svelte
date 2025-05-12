@@ -2,9 +2,7 @@
 	import { onMount } from 'svelte';
 	import { user } from '$lib/stores/auth';
 	import AuthModal from '$lib/AuthModal.svelte';
-	import ItemsAdmin from '$lib/admin/ItemsAdmin.svelte';
-	import CreateItem from '$lib/admin/CreateItem.svelte';
-	import ClaimedItemsAdmin from '$lib/admin/ClaimedItemsAdmin.svelte';
+	import Dashboard from '$lib/admin/Dashboard.svelte';
 	import { initializeUserStore } from '$lib/stores/auth';
 	import { refreshItems } from '$lib/stores/items';
 	let showAuthModal = $state(false);
@@ -18,11 +16,7 @@
 	});
 </script>
 
-{#if $user.admin}
-	<CreateItem />
-	<ItemsAdmin />
-	<ClaimedItemsAdmin />
-{:else}
+{#if $user.admin}<Dashboard />{:else}
 	<p>You are not authorized to access this page</p>
 {/if}
 

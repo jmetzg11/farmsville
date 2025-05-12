@@ -1,5 +1,5 @@
 <script>
-	import { formatDate } from '../root/helpers.js';
+	import { formatDate } from '$lib/root/helpers.js';
 	import { editItem, removeItem } from './helpers.js';
 	import { refreshItems } from '$lib/stores/items';
 	let { showModal = $bindable(false), selectedItem = null } = $props();

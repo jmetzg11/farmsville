@@ -23,3 +23,9 @@ type CreateItemRequest struct {
 	Description string `json:"description" binding:"required"`
 	Quantity    int    `json:"quantity" binding:"required"`
 }
+
+type CreateUserRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+}

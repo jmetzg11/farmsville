@@ -30,6 +30,7 @@ type User struct {
 	ID        uint   `gorm:"primaryKey"`
 	Email     string `gorm:"index"`
 	Name      string
+	Phone     string
 	Admin     bool
 	Code      string
 	ExpiresAt time.Time

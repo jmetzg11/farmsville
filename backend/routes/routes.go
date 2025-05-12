@@ -24,7 +24,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.GET("/show_auth", handler.ShowAuth)
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
-		// users
+		// auth
 		apiRouter.POST("/auth", handler.SendAuth)
 		apiRouter.POST("/auth/verify", handler.VerifyAuth)
 		apiRouter.GET("/auth/me", handler.AuthMe)
@@ -40,10 +40,20 @@ func SetupAPIRoutes(router *gin.Engine) {
 		adminRoutes := apiRouter.Group("/")
 		adminRoutes.Use(handler.AdminMiddleware())
 		{
+			// inventory
 			adminRoutes.POST("/items/update", handler.UpdateItem)
 			adminRoutes.POST("/items/remove", handler.RemoveItem)
 			adminRoutes.POST("/items/create", handler.CreateItem)
 			adminRoutes.POST("/claimed-item/remove", handler.RemoveClaimedItem)
+
+			// users
+			adminRoutes.GET("/users", handler.GetUsers)
+			adminRoutes.POST("/users/update", handler.UpdateUser)
+			adminRoutes.POST("/users/remove", handler.RemoveUser)
+			adminRoutes.POST("/users/create", handler.CreateUser)
+
+			// messages
+			adminRoutes.POST("/messages/update", handler.SendTextMessage)
 		}
 	}
 }

@@ -18,21 +18,12 @@ func (h *Handler) GetItems(c *gin.Context) {
 	}
 
 	var claimedItems []models.ClaimedItemWithUserName
-	if err := h.db.Raw(`
-        SELECT
-            claimed_items.*,
-            items.name as item_name,
-            users.name as user_name,
-            users.email as user_email
-        FROM
-            claimed_items
-        JOIN
-            items ON claimed_items.item_id = items.id
-        JOIN
-            users ON claimed_items.user_id = users.id
-        WHERE
-            claimed_items.active = ?
-    `, true).Scan(&claimedItems).Error; err != nil {
+	if err := h.db.Model(&models.ClaimedItem{}).
+		Select("claimed_items.*, items.name as item_name, users.name as user_name, users.email as user_email").
+		Joins("JOIN items ON claimed_items.item_id = items.id").
+		Joins("JOIN users ON claimed_items.user_id = users.id").
+		Where("claimed_items.active = ?", true).
+		Find(&claimedItems).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch claimed items",
 		})

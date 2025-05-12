@@ -3,12 +3,14 @@ package api
 import (
 	"farmsville/backend/models"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -41,6 +43,11 @@ func setupTestDB(t *testing.T) *gorm.DB {
 }
 
 func setUpTestRouter(handler *Handler) *gin.Engine {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	router := gin.New()
 
 	authGroup := router.Group("/")
@@ -50,6 +57,8 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	adminGroup.Use(handler.AdminMiddleware())
 
 	// admin
+	adminGroup.GET("/users", handler.GetUsers)
+	adminGroup.POST("/users/create", handler.CreateUser)
 	adminGroup.POST("/items/update", handler.UpdateItem)
 	adminGroup.POST("/items/remove", handler.RemoveItem)
 	adminGroup.POST("/items/create", handler.CreateItem)
