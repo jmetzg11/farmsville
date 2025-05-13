@@ -1,5 +1,5 @@
 <script>
-	import Messages from '$lib/admin/messages/Messages.svelte';
+	import TextMessages from '$lib/admin/messages/TextMessages.svelte';
 </script>
 
-<Messages />
+<TextMessages />

@@ -53,7 +53,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/users/create", handler.CreateUser)
 
 			// messages
-			adminRoutes.POST("/messages/update", handler.SendTextMessage)
+			adminRoutes.POST("/messages", handler.SendTextMessage)
 		}
 	}
 }
