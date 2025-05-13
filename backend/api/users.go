@@ -65,6 +65,17 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 }
 
 func (h *Handler) RemoveUser(c *gin.Context) {
+	var userID int
+	if err := c.ShouldBindJSON(&userID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.db.Delete(&models.User{}, userID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove user"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "User removed",

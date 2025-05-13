@@ -6,8 +6,9 @@
 		showDeleteModal = false;
 	}
 
-	function handleDeleteUser() {
-		deleteUser(selectedUser);
+	async function handleDeleteUser() {
+		await deleteUser(selectedUser);
+		showDeleteModal = false;
 	}
 </script>
 

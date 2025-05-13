@@ -194,6 +194,80 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+func TestDeleteUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+	router := setUpTestRouter(handler)
+
+	adminUser := models.User{
+		Name:  "Admin User",
+		Email: "admin@example.com",
+		Admin: true,
+	}
+
+	if err := db.Create(&adminUser).Error; err != nil {
+		t.Fatalf("Failed to create admin user: %v", err)
+	}
+
+	tokenString, err := getTestUserToken(adminUser)
+	if err != nil {
+		t.Fatalf("Failed to get test user token: %v", err)
+	}
+
+	testUser := models.User{
+		Name:  "Test User",
+		Email: "test@example.com",
+		Phone: "555-555-5555",
+		Admin: false,
+	}
+
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	requestBody, err := json.Marshal(int(testUser.ID))
+	if err != nil {
+		t.Fatalf("Failed to marshal request: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/users/remove", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if success, ok := response["success"].(bool); !ok || !success {
+		t.Fatalf("Expected success to be true, got %v", response["success"])
+	}
+
+	if message, ok := response["message"].(string); !ok || message != "User removed" {
+		t.Fatalf("Expected message to be 'User removed', got %v", response["message"])
+	}
+
+	var deletedUser models.User
+	result := db.First(&deletedUser, testUser.ID)
+	if result.Error == nil {
+		t.Fatalf("Expected user to be deleted, but it still exists in the database")
+	}
+
+}
+
 func TestCreateUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

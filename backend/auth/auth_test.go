@@ -6,9 +6,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func TestDefaultService(t *testing.T) {
+	_ = godotenv.Load("../../.env")
+
 	service := NewService()
 
 	t.Run("GenerateRandomCode", func(t *testing.T) {
@@ -35,7 +39,7 @@ func TestDefaultService(t *testing.T) {
 
 	t.Run("SendEmailWithAuthCode", func(t *testing.T) {
 		if os.Getenv("GMAIL_USER") == "" || os.Getenv("GMAIL_PASS") == "" {
-			t.Fatalf("Environment variables are not set")
+			t.Skip("Skipping email test: Environment variables are not set")
 		}
 
 		err := service.SendEmailWithAuthCode(os.Getenv("GMAIL_USER"), "123456")
