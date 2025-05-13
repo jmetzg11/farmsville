@@ -8,21 +8,20 @@
 	let showAddModal = $state(false);
 	let showEditModal = $state(false);
 	let showDeleteModal = $state(false);
-	let formDetails = $state({});
+	let selectedUser = $state({});
 
 	function showAddUser() {
-		console.log('I was called ');
 		showAddModal = true;
 	}
 
 	function showEditForm(user) {
 		showEditModal = true;
-		formDetails = user;
+		selectedUser = user;
 	}
 
 	function removeUser(user) {
 		showDeleteModal = true;
-		formDetails = user;
+		selectedUser = user;
 	}
 
 	onMount(async () => {
@@ -31,8 +30,8 @@
 </script>
 
 <AddUser bind:showAddModal />
-<EditUser bind:showEditModal bind:formDetails />
-<DeleteUser bind:showDeleteModal />
+<EditUser bind:showEditModal bind:selectedUser />
+<DeleteUser bind:showDeleteModal {selectedUser} />
 
 <button
 	class="px-4 py-2 bg-teal-500 text-white font-medium rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-50 shadow-sm transition-colors duration-200 cursor-pointer mb-4"

@@ -1,6 +1,6 @@
 <script>
 	import { updateUser } from './helpers';
-	let { showEditModal = $bindable(false), formDetails = $bindable({}) } = $props();
+	let { showEditModal = $bindable(false), selectedUser = $bindable({}) } = $props();
 
 	function closeModal() {
 		showEditModal = false;
@@ -8,7 +8,7 @@
 
 	async function editUser() {
 		showEditModal = false;
-		await updateUser(formDetails);
+		await updateUser(selectedUser);
 	}
 </script>
 
@@ -18,7 +18,7 @@
 	>
 		<div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
 			<h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
-				Edit {formDetails.name ? formDetails.name : formDetails.email}
+				Edit {selectedUser.name ? selectedUser.name : selectedUser.email}
 			</h2>
 
 			<div class="space-y-5">
@@ -43,7 +43,7 @@
 							id="name"
 							class="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-700"
 							placeholder="Enter full name"
-							bind:value={formDetails.name}
+							bind:value={selectedUser.name}
 						/>
 					</div>
 				</div>
@@ -69,7 +69,7 @@
 							type="email"
 							class="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-700"
 							placeholder="Enter email address"
-							bind:value={formDetails.email}
+							bind:value={selectedUser.email}
 						/>
 					</div>
 				</div>
@@ -96,24 +96,24 @@
 							type="tel"
 							class="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-700"
 							placeholder="Enter phone number"
-							bind:value={formDetails.phone}
+							bind:value={selectedUser.phone}
 						/>
 					</div>
 				</div>
 
-				<div class="flex gap-3 justify-end mt-8">
-					<button
-						onclick={closeModal}
-						class="px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200 shadow-sm cursor-pointer"
-					>
-						Cancel
-					</button>
+				<div class="flex gap-3 justify-between mt-8">
 					<button
 						onclick={editUser}
 						class="px-5 py-2.5 rounded-lg text-white font-medium shadow-sm transition-colors duration-200
 						bg-amber-600 hover:bg-amber-700 cursor-pointer"
 					>
 						Edit User
+					</button>
+					<button
+						onclick={closeModal}
+						class="px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200 shadow-sm cursor-pointer"
+					>
+						Cancel
 					</button>
 				</div>
 			</div>

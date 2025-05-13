@@ -109,13 +109,7 @@
 				</div>
 			</div>
 
-			<div class="flex gap-3 justify-end mt-8">
-				<button
-					onclick={closeModal}
-					class="px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200 shadow-sm cursor-pointer"
-				>
-					Cancel
-				</button>
+			<div class="flex gap-3 justify-between mt-8">
 				<button
 					onclick={addUser}
 					disabled={!isValidUser}
@@ -123,6 +117,12 @@
 						{isValidUser ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'}"
 				>
 					Add User
+				</button>
+				<button
+					onclick={closeModal}
+					class="px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200 shadow-sm cursor-pointer"
+				>
+					Cancel
 				</button>
 			</div>
 		</div>
