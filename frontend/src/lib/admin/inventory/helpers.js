@@ -1,3 +1,7 @@
+export async function claimItem(itemId, userId, amount) {
+	console.log('I was called');
+}
+
 export async function editItem(item) {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/update`;

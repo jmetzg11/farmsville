@@ -2,26 +2,26 @@
 	import { formatDate } from '$lib/root/helpers.js';
 	import { editItem, removeItem } from './helpers.js';
 	import { refreshItems } from '$lib/stores/items';
-	let { showModal = $bindable(false), selectedItem = null } = $props();
+	let { showEditModal = $bindable(false), selectedItem = null } = $props();
 
 	async function handleEdit() {
 		await editItem(selectedItem);
 		await refreshItems();
-		showModal = false;
+		showEditModal = false;
 	}
 
 	async function handleRemove() {
 		await removeItem(selectedItem.id);
 		await refreshItems();
-		showModal = false;
+		showEditModal = false;
 	}
 
 	function handleCancel() {
-		showModal = false;
+		showEditModal = false;
 	}
 </script>
 
-{#if showModal}
+{#if showEditModal}
 	<div
 		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
 	>

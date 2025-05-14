@@ -2,12 +2,19 @@
 	import { items } from '$lib/stores/items';
 	import { formatDate } from '$lib/root/helpers';
 	import EditItemModal from './EditItemModal.svelte';
+	import ClaimItemModal from './ClaimItemModal.svelte';
 	let selectedItem = $state(null);
-	let showModal = $state(false);
+	let showEditModal = $state(false);
+	let showClaimModal = $state(false);
 
-	function handleClick(item) {
+	function handleEdit(item) {
 		selectedItem = item;
-		showModal = true;
+		showEditModal = true;
+	}
+
+	function handleClaim(item) {
+		selectedItem = item;
+		showClaimModal = true;
 	}
 </script>
 
@@ -37,8 +44,14 @@
 							</div>
 						</div>
 						<button
-							onclick={() => handleClick(item)}
+							onclick={() => handleClaim(item)}
 							class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
+						>
+							Claim
+						</button>
+						<button
+							onclick={() => handleEdit(item)}
+							class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
 						>
 							Edit
 						</button>
@@ -49,4 +62,5 @@
 	</div>
 </div>
 
-<EditItemModal bind:showModal {selectedItem} />
+<EditItemModal bind:showEditModal {selectedItem} />
+<ClaimItemModal bind:showClaimModal {selectedItem} />
