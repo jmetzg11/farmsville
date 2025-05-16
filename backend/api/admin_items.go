@@ -3,6 +3,7 @@ package api
 import (
 	"farmsville/backend/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -69,6 +70,58 @@ func (h *Handler) CreateItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item created successfully"})
+}
+
+func (h *Handler) AdminClaimItem(c *gin.Context) {
+	var claimRequest models.AdminClaimItemRequest
+	if err := c.ShouldBindJSON(&claimRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var item models.Item
+	if err := h.db.First(&item, claimRequest.ItemID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Item not found",
+		})
+		return
+	}
+
+	if item.RemainingQty < claimRequest.Amount {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Not enough items in stock",
+		})
+		return
+	}
+
+	item.RemainingQty -= claimRequest.Amount
+	if err := h.db.Save(&item).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update item quantity",
+		})
+		return
+	}
+
+	claimedItem := models.ClaimedItem{
+		ItemID:    uint(claimRequest.ItemID),
+		UserID:    uint(claimRequest.UserID),
+		Quantity:  claimRequest.Amount,
+		CreatedAt: time.Now(),
+		Active:    true,
+	}
+
+	if err := h.db.Create(&claimedItem).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create claimed item",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Claim made",
+		"claim_id": claimedItem.ID,
+	})
+
 }
 
 func (h *Handler) RemoveClaimedItem(c *gin.Context) {

@@ -207,6 +207,87 @@ func TestCreateItem(t *testing.T) {
 	}
 }
 
+func TestAdminClaimItem(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+
+	adminUser := models.User{
+		Name:  "Admin User",
+		Email: "admin@example.com",
+		Admin: true,
+	}
+	if err := db.Create(&adminUser).Error; err != nil {
+		t.Fatalf("Failed to create admin user: %v", err)
+	}
+
+	regularUser := models.User{
+		Name:  "Regular User",
+		Email: "user@example.com",
+		Admin: false,
+	}
+	if err := db.Create(&regularUser).Error; err != nil {
+		t.Fatalf("Failed to create regular user: %v", err)
+	}
+
+	router := setUpTestRouter(handler)
+
+	item := models.Item{
+		Name:         "Test Item",
+		Description:  "Item for admin claiming test",
+		Quantity:     100,
+		RemainingQty: 100,
+		Active:       true,
+	}
+	db.Create(&item)
+
+	claimRequest := models.AdminClaimItemRequest{
+		ItemID: int(item.ID),
+		UserID: int(regularUser.ID),
+		Amount: 30,
+	}
+	requestBody, _ := json.Marshal(claimRequest)
+
+	tokenString, err := getTestUserToken(adminUser)
+	if err != nil {
+		t.Fatalf("Failed to get admin user token: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/items/admin-claim", bytes.NewBuffer(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code %d, got %d: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	var updatedItem models.Item
+	if err := db.First(&updatedItem, item.ID).Error; err != nil {
+		t.Fatalf("Failed to fetch updated item: %v", err)
+	}
+
+	expectedRemainingQty := item.RemainingQty - claimRequest.Amount
+	if updatedItem.RemainingQty != expectedRemainingQty {
+		t.Fatalf("Expected remaining quantity to be %d, got %d", expectedRemainingQty, updatedItem.RemainingQty)
+	}
+
+	var claimedItem models.ClaimedItem
+	if err := db.Where("item_id = ? AND user_id = ?", item.ID, regularUser.ID).First(&claimedItem).Error; err != nil {
+		t.Fatalf("Failed to fetch claimed item: %v", err)
+	}
+
+	if claimedItem.Quantity != claimRequest.Amount || !claimedItem.Active {
+		t.Fatalf("Claimed item was not created correctly in the database")
+	}
+}
+
 func TestRemoveClaimedItem(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

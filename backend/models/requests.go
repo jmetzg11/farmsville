@@ -37,3 +37,9 @@ type UpdateUserRequest struct {
 	Phone string `json:"phone"`
 	Admin bool   `json:"admin"`
 }
+
+type AdminClaimItemRequest struct {
+	UserID int `json:"userId" binding:"required"`
+	ItemID int `json:"itemId" binding:"required"`
+	Amount int `json:"amount" binding:"required"`
+}

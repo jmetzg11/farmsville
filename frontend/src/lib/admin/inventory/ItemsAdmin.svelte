@@ -43,6 +43,8 @@
 								<span class="font-medium">{item.remaining_quantity}</span> / {item.quantity} remaining
 							</div>
 						</div>
+					</div>
+					<div class="flex gap-2 justify-between mt-8">
 						<button
 							onclick={() => handleClaim(item)}
 							class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"

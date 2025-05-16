@@ -66,6 +66,7 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	adminGroup.POST("/items/update", handler.UpdateItem)
 	adminGroup.POST("/items/remove", handler.RemoveItem)
 	adminGroup.POST("/items/create", handler.CreateItem)
+	adminGroup.POST("/items/admin-claim", handler.AdminClaimItem)
 	adminGroup.POST("/claimed-item/remove", handler.RemoveClaimedItem)
 
 	// customers

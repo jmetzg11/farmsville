@@ -1,7 +1,6 @@
 export async function makeClaim(itemId, quantity) {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/claim`;
-		console.log(url);
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {

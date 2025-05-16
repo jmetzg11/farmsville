@@ -1,5 +1,23 @@
-export async function claimItem(itemId, userId, amount) {
-	console.log('I was called');
+export async function claimItem(userId, itemId, amount) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/items/admin-claim`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ userId, itemId, amount }),
+			credentials: 'include'
+		});
+		if (!response.ok) {
+			console.error('Error claiming item', response.statusText);
+			return false;
+		}
+		return true;
+	} catch (error) {
+		console.error('Error claiming item', error);
+		return false;
+	}
 }
 
 export async function editItem(item) {
