@@ -95,7 +95,7 @@
 						onclick={handleEdit}
 						class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
 					>
-						Edit
+						Save
 					</button>
 					<button
 						onclick={handleRemove}
