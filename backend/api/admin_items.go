@@ -2,10 +2,20 @@ package api
 
 import (
 	"farmsville/backend/models"
+	"fmt"
+	"image"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
+	_ "image/gif"
+	"image/jpeg"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/gin-gonic/gin"
+	"github.com/nfnt/resize"
 )
 
 func (h *Handler) UpdateItem(c *gin.Context) {
@@ -50,15 +60,87 @@ func (h *Handler) RemoveItem(c *gin.Context) {
 }
 
 func (h *Handler) CreateItem(c *gin.Context) {
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form"})
+		return
+	}
+
 	var newItem models.CreateItemRequest
-	if err := c.ShouldBindJSON(&newItem); err != nil {
+	if err := c.ShouldBind(&newItem); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	photoPath := ""
+
+	file, header, err := c.Request.FormFile("photo")
+	if err == nil && file != nil {
+		defer file.Close()
+
+		buff := make([]byte, 512)
+		_, err = file.Read(buff)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read photo file"})
+			return
+		}
+
+		_, err = file.Seek(0, 0)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to reset file"})
+			return
+		}
+
+		fileType := http.DetectContentType(buff)
+		if !strings.HasPrefix(fileType, "image/") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "File is not an image"})
+			return
+		}
+
+		now := time.Now()
+		dirPath := fmt.Sprintf("data/photos/%d%02d", now.Year(), now.Month())
+		if err := os.MkdirAll(dirPath, 0755); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create directory"})
+			return
+		}
+
+		filename := fmt.Sprintf("%d_%s", now.Unix(), header.Filename)
+		filename = strings.ReplaceAll(filename, " ", "_")
+		photoPath = fmt.Sprintf("%s/%s", dirPath, filename)
+
+		out, err := os.Create(photoPath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create photo file"})
+			return
+		}
+		defer out.Close()
+
+		img, _, err := image.Decode(file)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to decode image"})
+			return
+		}
+
+		var resizedImg image.Image
+		bounds := img.Bounds()
+		maxWidth := 1200
+		if bounds.Dx() > maxWidth {
+			newHeight := int(float64(bounds.Dy()) * float64(maxWidth) / float64(bounds.Dx()))
+			resizedImg = resize.Resize(uint(maxWidth), uint(newHeight), img, resize.Lanczos3)
+		} else {
+			resizedImg = img
+		}
+
+		err = jpeg.Encode(out, resizedImg, &jpeg.Options{Quality: 85})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encode image"})
+			return
+		}
 	}
 
 	item := models.Item{
 		Name:         newItem.Name,
 		Description:  newItem.Description,
+		PhotoPath:    photoPath,
 		Quantity:     newItem.Quantity,
 		RemainingQty: newItem.Quantity,
 		Active:       true,

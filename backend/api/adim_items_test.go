@@ -4,8 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
+	"image"
+	"image/jpeg"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -158,6 +163,12 @@ func TestCreateItem(t *testing.T) {
 	db := setupTestDB(t)
 	handler := NewHandler(db)
 
+	tempDir := "data/photos"
+	if err := os.MkdirAll(tempDir, 0755); err != nil {
+		t.Fatalf("Failed to create test photo directory: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
 	testUser := models.User{
 		Name:  "Test User",
 		Email: "testuser@example.com",
@@ -169,12 +180,34 @@ func TestCreateItem(t *testing.T) {
 
 	router := setUpTestRouter(handler)
 
-	newItem := models.CreateItemRequest{
-		Name:        "Test Item",
-		Description: "Item for creation test",
-		Quantity:    100,
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	testItem := struct {
+		title       string
+		description string
+		quantity    int
+	}{
+		title:       "Test Item",
+		description: "Item for creation test",
+		quantity:    100,
 	}
-	requestBody, _ := json.Marshal(newItem)
+
+	_ = writer.WriteField("title", testItem.title)
+	_ = writer.WriteField("description", testItem.description)
+	_ = writer.WriteField("quantity", strconv.Itoa(testItem.quantity))
+
+	fileWriter, err := writer.CreateFormFile("photo", "test_image.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
+
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	if err := jpeg.Encode(fileWriter, img, nil); err != nil {
+		t.Fatalf("Failed to encode test image: %v", err)
+	}
+
+	writer.Close()
 
 	tokenString, err := getTestUserToken(testUser)
 	if err != nil {
@@ -182,8 +215,8 @@ func TestCreateItem(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/items/create", bytes.NewBuffer(requestBody))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", "/items/create", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.AddCookie(&http.Cookie{
 		Name:  "auth_token",
 		Value: tokenString,
@@ -196,14 +229,18 @@ func TestCreateItem(t *testing.T) {
 	}
 
 	var createdItem models.Item
-	if err := db.First(&createdItem, "name = ?", newItem.Name).Error; err != nil {
+	if err := db.First(&createdItem, "name = ?", testItem.title).Error; err != nil {
 		t.Fatalf("Failed to fetch created item: %v", err)
 	}
 
-	if createdItem.Name != newItem.Name ||
-		createdItem.Description != newItem.Description ||
-		createdItem.Quantity != newItem.Quantity {
+	if createdItem.Name != testItem.title ||
+		createdItem.Description != testItem.description ||
+		createdItem.Quantity != testItem.quantity {
 		t.Fatalf("Item was not created correctly in the database")
+	}
+
+	if _, err := os.Stat(createdItem.PhotoPath); os.IsNotExist(err) {
+		t.Fatalf("Photo file does not exist at path: %s", createdItem.PhotoPath)
 	}
 }
 

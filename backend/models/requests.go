@@ -19,9 +19,9 @@ type ItemRequest struct {
 }
 
 type CreateItemRequest struct {
-	Name        string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Quantity    int    `json:"quantity" binding:"required"`
+	Name        string `form:"title" binding:"required"`
+	Description string `form:"description" binding:"required"`
+	Quantity    int    `form:"quantity" binding:"required"`
 }
 
 type CreateUserRequest struct {

@@ -64,15 +64,15 @@ export async function removeItem(itemID) {
 	}
 }
 
-export async function createItem(item) {
+export async function createItem(formData) {
+	for (const [key, value] of formData.entries()) {
+		console.log(key, value);
+	}
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/create`;
 		const response = await fetch(url, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(item),
+			body: formData,
 			credentials: 'include'
 		});
 		if (!response.ok) {

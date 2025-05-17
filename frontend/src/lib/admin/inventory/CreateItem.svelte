@@ -5,13 +5,35 @@
 	const DEFAULT_ITEM = {
 		title: '',
 		description: '',
-		quantity: 0
+		quantity: 0,
+		photo: null
 	};
 
 	let newItem = { ...DEFAULT_ITEM };
+	let fileInput;
+
+	function triggerFileInput() {
+		fileInput.click();
+	}
+
+	function handlePhotoChange(event) {
+		const file = event.target.files[0];
+		if (file) {
+			newItem.photo = file;
+		}
+	}
 
 	async function handleCreate() {
-		await createItem(newItem);
+		const formData = new FormData();
+		formData.append('title', newItem.title);
+		formData.append('description', newItem.description);
+		formData.append('quantity', newItem.quantity.toString());
+
+		if (newItem.photo) {
+			formData.append('photo', newItem.photo);
+		}
+
+		await createItem(formData);
 		await refreshItems();
 		newItem = { ...DEFAULT_ITEM };
 	}
@@ -61,13 +83,21 @@
 					</div>
 					<div class="flex items-center">
 						<div class="bg-amber-400 mr-2">under construction</div>
+						<input
+							type="file"
+							accept="image/*"
+							bind:this={fileInput}
+							onchange={handlePhotoChange}
+							class="hidden"
+						/>
 						<button
+							onclick={triggerFileInput}
 							class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
-							>Upload Photo</button
+							>{newItem.photo ? 'Photo Selected' : 'Upload Photo'}</button
 						>
 					</div>
 					<button
-						on:click={handleCreate}
+						onclick={handleCreate}
 						disabled={!isFormValid}
 						class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer
 						disabled:bg-blue-300 disabled:cursor-not-allowed"
