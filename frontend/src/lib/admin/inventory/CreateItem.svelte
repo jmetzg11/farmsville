@@ -47,7 +47,7 @@
 					></textarea>
 				</div>
 
-				<!-- Bottom row for quantity and create button -->
+				<!-- Bottom row for quantity, photo, and create button -->
 				<div class="flex items-center justify-between">
 					<div class="flex items-center">
 						<label for="quantity" class="text-sm text-gray-700 mr-2">Quantity:</label>
@@ -58,6 +58,9 @@
 							class="font-medium w-16 border border-gray-300 rounded px-2 py-1"
 							min="0"
 						/>
+					</div>
+					<div class="flex items-center">
+						<label for="photo" class="block text-sm text-gray-700 mr-2">Photo:</label>
 					</div>
 					<button
 						on:click={handleCreate}

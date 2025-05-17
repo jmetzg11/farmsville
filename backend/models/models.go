@@ -9,6 +9,7 @@ type Item struct {
 	ID           uint          `gorm:"primaryKey" json:"id"`
 	Name         string        `gorm:"size:255;not null" json:"name"`
 	Description  string        `gorm:"type:text" json:"description"`
+	PhotoPath    string        `gorm:"type:text" json:"photo_path"`
 	Quantity     int           `json:"quantity"`
 	RemainingQty int           `json:"remaining_quantity"`
 	ClaimedItems []ClaimedItem `gorm:"foreignKey:ItemID" json:"claimed_items,omitempty"`
