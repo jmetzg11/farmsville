@@ -60,7 +60,11 @@
 						/>
 					</div>
 					<div class="flex items-center">
-						<label for="photo" class="block text-sm text-gray-700 mr-2">Photo:</label>
+						<div class="bg-amber-400 mr-2">under construction</div>
+						<button
+							class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
+							>Upload Photo</button
+						>
 					</div>
 					<button
 						on:click={handleCreate}
