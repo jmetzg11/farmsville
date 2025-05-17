@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"farmsville/backend/models"
+	"fmt"
 	"image"
 	"image/jpeg"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -41,15 +44,43 @@ func TestUpdateItem(t *testing.T) {
 	}
 	db.Create(&item)
 
-	updatedItem := models.Item{
-		ID:           item.ID,
-		Name:         "Test Item",
-		Description:  "Item for claiming",
-		Quantity:     100,
-		RemainingQty: 100,
-		Active:       true,
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	writer.WriteField("id", fmt.Sprintf("%d", item.ID))
+	writer.WriteField("name", "Updated Item")
+	writer.WriteField("description", "Updated description")
+	writer.WriteField("quantity", "150")
+	writer.WriteField("remaining_quantity", "150")
+	writer.WriteField("active", "true")
+
+	imageFile, err := os.CreateTemp("", "test-image-*.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	requestBody, _ := json.Marshal(updatedItem)
+	defer os.Remove(imageFile.Name())
+
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	if err := jpeg.Encode(imageFile, img, nil); err != nil {
+		t.Fatalf("Failed to encode test image: %v", err)
+	}
+	imageFile.Close()
+
+	imageFile, err = os.Open(imageFile.Name())
+	if err != nil {
+		t.Fatalf("Failed to open test image: %v", err)
+	}
+	defer imageFile.Close()
+
+	part, err := writer.CreateFormFile("photo", "test-image.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
+	if _, err := io.Copy(part, imageFile); err != nil {
+		t.Fatalf("Failed to copy file content: %v", err)
+	}
+
+	writer.Close()
 
 	tokenString, err := getTestUserToken(testUser)
 	if err != nil {
@@ -57,8 +88,8 @@ func TestUpdateItem(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/items/update", bytes.NewBuffer(requestBody))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", "/items/update", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.AddCookie(&http.Cookie{
 		Name:  "auth_token",
 		Value: tokenString,
@@ -74,13 +105,20 @@ func TestUpdateItem(t *testing.T) {
 		t.Fatalf("Failed to fetch updated item: %v", err)
 	}
 
-	if updatedItemFromDB.Name != updatedItem.Name ||
-		updatedItemFromDB.Description != updatedItem.Description ||
-		updatedItemFromDB.Quantity != updatedItem.Quantity ||
-		updatedItemFromDB.RemainingQty != updatedItem.RemainingQty ||
-		updatedItemFromDB.Active != updatedItem.Active {
+	if updatedItemFromDB.Name != "Updated Item" ||
+		updatedItemFromDB.Description != "Updated description" ||
+		updatedItemFromDB.Quantity != 150 ||
+		updatedItemFromDB.RemainingQty != 150 ||
+		updatedItemFromDB.Active != true {
 		t.Fatalf("Item was not updated correctly in the database")
 	}
+
+	if updatedItemFromDB.PhotoPath == "" {
+		t.Fatalf("Expected photo path to be saved, but got empty string")
+	}
+
+	photoFilePath := fmt.Sprintf("data/photos%s", updatedItemFromDB.PhotoPath)
+	os.Remove(photoFilePath)
 }
 
 func TestRemoveItem(t *testing.T) {
@@ -239,7 +277,8 @@ func TestCreateItem(t *testing.T) {
 		t.Fatalf("Item was not created correctly in the database")
 	}
 
-	if _, err := os.Stat(createdItem.PhotoPath); os.IsNotExist(err) {
+	fullPhotoPath := filepath.Join("data/photos", createdItem.PhotoPath)
+	if _, err := os.Stat(fullPhotoPath); os.IsNotExist(err) {
 		t.Fatalf("Photo file does not exist at path: %s", createdItem.PhotoPath)
 	}
 }

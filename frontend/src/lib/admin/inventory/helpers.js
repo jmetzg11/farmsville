@@ -20,15 +20,23 @@ export async function claimItem(userId, itemId, amount) {
 	}
 }
 
-export async function editItem(item) {
+export async function editItem(item, photoFile) {
+	const formData = new FormData();
+	formData.append('id', item.id);
+	formData.append('name', item.name);
+	formData.append('description', item.description);
+	formData.append('quantity', item.quantity);
+	formData.append('remaining_quantity', item.remaining_quantity);
+	formData.append('photo', photoFile);
+
+	for (const [key, value] of formData.entries()) {
+		console.log(key, value);
+	}
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/update`;
 		const response = await fetch(url, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(item),
+			body: formData,
 			credentials: 'include'
 		});
 		if (!response.ok) {
@@ -65,9 +73,6 @@ export async function removeItem(itemID) {
 }
 
 export async function createItem(formData) {
-	for (const [key, value] of formData.entries()) {
-		console.log(key, value);
-	}
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/items/create`;
 		const response = await fetch(url, {

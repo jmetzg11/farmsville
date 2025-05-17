@@ -82,7 +82,6 @@
 						/>
 					</div>
 					<div class="flex items-center">
-						<div class="bg-amber-400 mr-2">under construction</div>
 						<input
 							type="file"
 							accept="image/*"

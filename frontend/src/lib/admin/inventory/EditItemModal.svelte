@@ -4,8 +4,22 @@
 	import { refreshItems } from '$lib/stores/items';
 	let { showEditModal = $bindable(false), selectedItem = null } = $props();
 
+	let fileInput;
+	let photoFile = $state(null);
+
+	function triggerFileInput() {
+		fileInput.click();
+	}
+
+	function handlePhotoChange(event) {
+		const file = event.target.files[0];
+		if (file) {
+			photoFile = file;
+		}
+	}
+
 	async function handleEdit() {
-		await editItem(selectedItem);
+		await editItem(selectedItem, photoFile);
 		await refreshItems();
 		showEditModal = false;
 	}
@@ -26,7 +40,7 @@
 		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
 	>
 		<div
-			class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
+			class="w-full max-w-lg bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
 		>
 			<div class="p-4">
 				<div class="flex justify-between items-center mb-2">
@@ -62,6 +76,19 @@
 							<span>remaining</span>
 						</div>
 					</div>
+
+					<button
+						onclick={triggerFileInput}
+						class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
+						>{photoFile ? 'Photo Selected' : 'Upload Photo'}</button
+					>
+					<input
+						type="file"
+						accept="image/*"
+						bind:this={fileInput}
+						onchange={handlePhotoChange}
+						class="hidden"
+					/>
 				</div>
 				<div class="flex gap-2 justify-between mt-4">
 					<button

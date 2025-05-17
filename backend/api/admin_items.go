@@ -19,19 +19,41 @@ import (
 )
 
 func (h *Handler) UpdateItem(c *gin.Context) {
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form"})
+		return
+	}
 	var item models.Item
-	if err := c.ShouldBindJSON(&item); err != nil {
+	if err := c.ShouldBind(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.db.Model(&models.Item{}).Where("id = ?", item.ID).Updates(map[string]interface{}{
+	var existingItem models.Item
+	if err := h.db.First(&existingItem, item.ID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		return
+	}
+
+	photoPath, err := h.handlePhotoUpload(c, existingItem.PhotoPath)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updates := map[string]interface{}{
 		"name":          item.Name,
 		"description":   item.Description,
 		"quantity":      item.Quantity,
 		"remaining_qty": item.RemainingQty,
-		"active":        item.Active,
-	}).Error; err != nil {
+		"active":        true,
+	}
+
+	if photoPath != "" {
+		updates["photo_path"] = photoPath
+	}
+
+	if err := h.db.Model(&models.Item{}).Where("id = ?", item.ID).Updates(updates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
 		return
 	}
@@ -71,70 +93,10 @@ func (h *Handler) CreateItem(c *gin.Context) {
 		return
 	}
 
-	photoPath := ""
-
-	file, header, err := c.Request.FormFile("photo")
-	if err == nil && file != nil {
-		defer file.Close()
-
-		buff := make([]byte, 512)
-		_, err = file.Read(buff)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read photo file"})
-			return
-		}
-
-		_, err = file.Seek(0, 0)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to reset file"})
-			return
-		}
-
-		fileType := http.DetectContentType(buff)
-		if !strings.HasPrefix(fileType, "image/") {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "File is not an image"})
-			return
-		}
-
-		now := time.Now()
-		dirPath := fmt.Sprintf("data/photos/%d%02d", now.Year(), now.Month())
-		if err := os.MkdirAll(dirPath, 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create directory"})
-			return
-		}
-
-		filename := fmt.Sprintf("%d_%s", now.Unix(), header.Filename)
-		filename = strings.ReplaceAll(filename, " ", "_")
-		photoPath = fmt.Sprintf("%s/%s", dirPath, filename)
-
-		out, err := os.Create(photoPath)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create photo file"})
-			return
-		}
-		defer out.Close()
-
-		img, _, err := image.Decode(file)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to decode image"})
-			return
-		}
-
-		var resizedImg image.Image
-		bounds := img.Bounds()
-		maxWidth := 1200
-		if bounds.Dx() > maxWidth {
-			newHeight := int(float64(bounds.Dy()) * float64(maxWidth) / float64(bounds.Dx()))
-			resizedImg = resize.Resize(uint(maxWidth), uint(newHeight), img, resize.Lanczos3)
-		} else {
-			resizedImg = img
-		}
-
-		err = jpeg.Encode(out, resizedImg, &jpeg.Options{Quality: 85})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encode image"})
-			return
-		}
+	photoPath, err := h.handlePhotoUpload(c, "")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	item := models.Item{
@@ -237,4 +199,72 @@ func (h *Handler) RemoveClaimedItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Claimed item deactivated successfully"})
+}
+
+func (h *Handler) handlePhotoUpload(c *gin.Context, existingPhotoPath string) (string, error) {
+	file, header, err := c.Request.FormFile("photo")
+	if err != nil || file == nil {
+		return "", nil
+	}
+	defer file.Close()
+
+	buff := make([]byte, 512)
+	if _, err = file.Read(buff); err != nil {
+		return "", fmt.Errorf("failed to read photo file: %w", err)
+	}
+
+	if _, err = file.Seek(0, 0); err != nil {
+		return "", fmt.Errorf("failed to reset file: %w", err)
+	}
+
+	fileType := http.DetectContentType(buff)
+	if !strings.HasPrefix(fileType, "image/") {
+		return "", fmt.Errorf("file is not an image")
+	}
+
+	now := time.Now()
+	yearMonthDir := fmt.Sprintf("%d%02d", now.Year(), now.Month())
+	dirPath := fmt.Sprintf("data/photos/%s", yearMonthDir)
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	filename := fmt.Sprintf("%d_%s", now.Unix(), header.Filename)
+	filename = strings.ReplaceAll(filename, " ", "_")
+	fullPath := fmt.Sprintf("%s/%s", dirPath, filename)
+	photoPath := fmt.Sprintf("/%s/%s", yearMonthDir, filename)
+
+	out, err := os.Create(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create photo file: %w", err)
+	}
+	defer out.Close()
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode image: %w", err)
+	}
+
+	var resizedImg image.Image
+	bounds := img.Bounds()
+	maxWidth := 1200
+	if bounds.Dx() > maxWidth {
+		newHeight := int(float64(bounds.Dy()) * float64(maxWidth) / float64(bounds.Dx()))
+		resizedImg = resize.Resize(uint(maxWidth), uint(newHeight), img, resize.Lanczos3)
+	} else {
+		resizedImg = img
+	}
+
+	if err = jpeg.Encode(out, resizedImg, &jpeg.Options{Quality: 85}); err != nil {
+		return "", fmt.Errorf("failed to encode image: %w", err)
+	}
+
+	if existingPhotoPath != "" && existingPhotoPath != photoPath {
+		oldPhotoFullPath := fmt.Sprintf("data/photos%s", existingPhotoPath)
+		if err := os.Remove(oldPhotoFullPath); err != nil {
+			fmt.Printf("Failed to delete old photo: %s. Error: %v\n", oldPhotoFullPath, err)
+		}
+	}
+
+	return photoPath, nil
 }

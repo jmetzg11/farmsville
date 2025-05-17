@@ -3,9 +3,12 @@
 	import { formatDate } from '$lib/root/helpers';
 	import EditItemModal from './EditItemModal.svelte';
 	import ClaimItemModal from './ClaimItemModal.svelte';
+	import PhotoModal from '$lib/root/PhotoModal.svelte';
 	let selectedItem = $state(null);
 	let showEditModal = $state(false);
 	let showClaimModal = $state(false);
+	let showPhotoModal = $state(false);
+	let photoUrl = $state('');
 
 	function handleEdit(item) {
 		selectedItem = item;
@@ -15,6 +18,11 @@
 	function handleClaim(item) {
 		selectedItem = item;
 		showClaimModal = true;
+	}
+
+	function openPhotoModal(photoPath) {
+		photoUrl = `${import.meta.env.VITE_PHOTO_URL}/${photoPath}`;
+		showPhotoModal = true;
 	}
 </script>
 
@@ -30,7 +38,23 @@
 						<h3 class="text-lg font-bold text-gray-800">{item.name}</h3>
 						<span class="text-xs text-gray-500">{formatDate(item.created_at)}</span>
 					</div>
-					<p class="text-gray-600 mb-3 text-sm">{item.description}</p>
+					{#if item.photo_path}
+						<button
+							type="button"
+							class="h-28 w-full overflow-hidden mb-2 cursor-pointer"
+							onclick={() => openPhotoModal(item.photo_path)}
+							onkeydown={(e) => e.key === 'Enter' && openPhotoModal(item.photo_path)}
+						>
+							<img
+								src={`${import.meta.env.VITE_PHOTO_URL}/${item.photo_path}`}
+								alt={item.name}
+								class="w-full h-full object-cover"
+							/>
+						</button>
+					{/if}
+					<p class="text-gray-600 mb-3 text-sm {item.photo_path ? 'text-center' : ''}">
+						{item.description}
+					</p>
 					<div class="flex justify-between items-center mt-4">
 						<div>
 							<div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -66,3 +90,4 @@
 
 <EditItemModal bind:showEditModal {selectedItem} />
 <ClaimItemModal bind:showClaimModal {selectedItem} />
+<PhotoModal bind:showPhotoModal {photoUrl} />

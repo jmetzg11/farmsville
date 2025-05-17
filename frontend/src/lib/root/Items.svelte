@@ -2,11 +2,16 @@
 	import { user } from '$lib/stores/auth';
 	import AuthModal from '$lib/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
+	import PhotoModal from './PhotoModal.svelte';
 	import { formatDate } from './helpers.js';
 	import { items } from '$lib/stores/items';
+
 	let showAuthModal = $state(false);
 	let showClaimModal = $state(false);
+	let showPhotoModal = $state(false);
+
 	let selectedItem = $state(null);
+	let photoUrl = $state('');
 
 	function handleClick(item) {
 		selectedItem = item;
@@ -15,6 +20,11 @@
 		} else {
 			showAuthModal = true;
 		}
+	}
+
+	function openPhotoModal(photoPath) {
+		photoUrl = `${import.meta.env.VITE_PHOTO_URL}/${photoPath}`;
+		showPhotoModal = true;
 	}
 </script>
 
@@ -30,7 +40,23 @@
 						<h3 class="text-lg font-bold text-gray-800">{item.name}</h3>
 						<span class="text-xs text-gray-500">{formatDate(item.created_at)}</span>
 					</div>
-					<p class="text-gray-600 mb-3 text-sm">{item.description}</p>
+					{#if item.photo_path}
+						<button
+							type="button"
+							class="h-28 w-full overflow-hidden mb-2 cursor-pointer"
+							onclick={() => openPhotoModal(item.photo_path)}
+							onkeydown={(e) => e.key === 'Enter' && openPhotoModal(item.photo_path)}
+						>
+							<img
+								src={`${import.meta.env.VITE_PHOTO_URL}/${item.photo_path}`}
+								alt={item.name}
+								class="w-full h-full object-cover"
+							/>
+						</button>
+					{/if}
+					<p class="text-gray-600 mb-3 text-sm {item.photo_path ? 'text-center' : ''}">
+						{item.description}
+					</p>
 					<div class="flex justify-between items-center mt-4">
 						<div>
 							<div class="w-full bg-gray-200 rounded-full h-2.5">
@@ -59,3 +85,5 @@
 <AuthModal bind:showAuthModal />
 
 <MakeClaimModal bind:showClaimModal {selectedItem} />
+
+<PhotoModal bind:showPhotoModal {photoUrl} />

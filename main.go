@@ -20,6 +20,7 @@ func main() {
 	fmt.Println("Database connected successfully!")
 	r := gin.Default()
 
+	r.Static("/photos", "./data/photos")
 	routes.SetupStaticRoutes(r)
 	routes.SetupAPIRoutes(r)
 
