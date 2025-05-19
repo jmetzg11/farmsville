@@ -2,6 +2,7 @@
 	import { user } from '$lib/stores/auth';
 	let { children } = $props();
 	import '../app.css';
+	import Footer from './Footer.svelte';
 </script>
 
 <div class="min-h-screen flex flex-col">
@@ -30,4 +31,5 @@
 	<main class="flex-grow">
 		{@render children()}
 	</main>
+	<Footer />
 </div>
