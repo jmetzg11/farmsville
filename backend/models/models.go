@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// think about adding composite indexes
+
 // Item represents an inventory item
 type Item struct {
 	ID           uint          `gorm:"primaryKey" json:"id" form:"id"`
@@ -14,7 +16,7 @@ type Item struct {
 	RemainingQty int           `json:"remaining_quantity" form:"remaining_quantity"`
 	ClaimedItems []ClaimedItem `gorm:"foreignKey:ItemID" json:"claimed_items,omitempty"`
 	CreatedAt    time.Time     `json:"created_at"`
-	Active       bool          `json:"active"`
+	Active       bool          `gorm:"index"json:"active"`
 }
 
 // ClaimedItem represents an item claimed by a user
@@ -24,7 +26,7 @@ type ClaimedItem struct {
 	UserID    uint      `json:"user_id"`
 	Quantity  int       `json:"quantity"`
 	CreatedAt time.Time `json:"created_at"`
-	Active    bool      `json:"active"`
+	Active    bool      `gorm:"index" json:"active"`
 }
 
 type User struct {
