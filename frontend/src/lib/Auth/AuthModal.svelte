@@ -1,5 +1,6 @@
 <script>
-	import { setUser } from '$lib/stores/auth';
+	import { authenticateUser, user } from '$lib/stores/auth';
+	import { authVerify, handleTryAgain, preventNonNumericInput, logout, emailAuth } from './helpers';
 	let { showAuthModal = $bindable(false) } = $props();
 	let email = $state('');
 	let code = $state('');
@@ -13,26 +14,12 @@
 		code = '';
 	}
 
-	async function handleSubmit() {
-		try {
-			const url = `${import.meta.env.VITE_API_URL}/auth`;
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ email: email.toLowerCase() })
-			});
+	$effect(() => {
+		status = $user.isAuthenticated ? 'logout' : 'start';
+	});
 
-			if (response.ok) {
-				status = 'enter-code';
-			} else {
-				const errorData = await response.json();
-				console.error('Server returned an error:', response.status, errorData);
-			}
-		} catch (error) {
-			console.error('Network error sending auth email:', error);
-		}
+	async function handleSendCode() {
+		status = await emailAuth(email, code);
 	}
 
 	function handleCodeInput(e) {
@@ -43,38 +30,19 @@
 		}
 	}
 
-	function preventNonNumericInput(e) {
-		if (!/[0-9]/.test(e.key)) {
-			e.preventDefault();
-		}
-	}
-
 	async function handleCodeSubmit() {
-		try {
-			const url = `${import.meta.env.VITE_API_URL}/auth/verify`;
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				credentials: 'include',
-				body: JSON.stringify({ email: email.toLowerCase(), code })
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setUser(data.user);
-				closeModal();
-			} else {
-				status = 'error';
-			}
-		} catch (error) {
-			console.error('Network error sending auth code:', error);
+		const result = await authVerify(email, code);
+		if (result.status === 'success') {
+			authenticateUser(result.user);
+			closeModal();
+		} else {
+			status = 'error';
 		}
 	}
 
-	function handleTryAgain() {
-		status = 'enter-code';
+	async function handleLogout() {
+		await logout();
+		closeModal();
 	}
 </script>
 
@@ -85,8 +53,7 @@
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
 			{#if status === 'start'}
 				<p class="text-gray-600 mb-4">
-					Enter your email address and we'll send you a 6 digit code. It'll come from Helen's son's
-					account (jmetzg11) and expire in 15 minutes.
+					Enter your email address and we'll send you a 6 digit code from a gmail account.
 				</p>
 				<input
 					type="email"
@@ -96,7 +63,7 @@
 				/>
 				<div class="flex gap-2 justify-between mt-4">
 					<button
-						onclick={handleSubmit}
+						onclick={handleSendCode}
 						disabled={!isEmailValid}
 						class="py-2 px-4 rounded-md text-white
 					transition-colors duration-200
@@ -118,7 +85,7 @@
 						type="text"
 						value={code}
 						oninput={handleCodeInput}
-						onkeypress={preventNonNumericInput}
+						onkeypress={(e) => preventNonNumericInput(e)}
 						inputmode="numeric"
 						pattern="[0-9]*"
 						maxlength="6"
@@ -134,11 +101,26 @@
 						Cancel
 					</button>
 				</div>
+			{:else if status === 'logout'}
+				<p class="text-gray-600 mb-4">Are you sure you want to log out?</p>
+				<div class="flex gap-2 justify-between mt-4">
+					<button
+						onclick={handleLogout}
+						class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
+						>Logout</button
+					>
+					<button
+						onclick={() => (showAuthModal = false)}
+						class="py-2 px-4 rounded-md text-white
+					transition-colors duration-200
+					bg-blue-600 hover:bg-blue-700 cursor-pointer">cancel</button
+					>
+				</div>
 			{:else if status === 'error'}
 				<p class="text-red-600 mb-4">Invalid code. Please try again.</p>
 				<div class="flex gap-2 justify-between mt-4">
 					<button
-						onclick={handleTryAgain}
+						onclick={() => handleTryAgain(status)}
 						class="py-2 px-4 rounded-md text-white
 					transition-colors duration-200 bg-blue-600 hover:bg-blue-700 cursor-pointer
 					"

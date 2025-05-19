@@ -1,6 +1,6 @@
 <script>
 	import { user } from '$lib/stores/auth';
-	import AuthModal from '$lib/AuthModal.svelte';
+	import AuthModal from '$lib/Auth/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
 	import PhotoModal from './PhotoModal.svelte';
 	import { formatDate } from './helpers.js';

@@ -1,17 +1,16 @@
 import { writable } from 'svelte/store';
 
-export const user = writable({
+export const defaultUser = {
 	name: null,
 	email: null,
 	admin: false,
 	isAuthenticated: false
-});
+};
 
-export function setUser(userData) {
-	user.set({
-		...userData,
-		isAuthenticated: true
-	});
+export const user = writable(defaultUser);
+
+export function authenticateUser(userData) {
+	user.set(userData);
 }
 
 export async function initializeUserStore() {
@@ -20,13 +19,16 @@ export async function initializeUserStore() {
 		const response = await fetch(url, {
 			credentials: 'include'
 		});
+		console.log('Response:', response);
 		if (response.ok) {
 			const userData = await response.json();
-			setUser(userData.user);
+			console.log('User data:', userData);
+			authenticateUser(userData.user);
 			return true;
 		}
 		return false;
 	} catch (error) {
+		console.log('Error initializing user store', error);
 		console.error('Error initializing user store', error);
 		return false;
 	}

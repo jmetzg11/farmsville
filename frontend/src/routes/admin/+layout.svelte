@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { initializeUserStore } from '$lib/stores/auth';
 	import { refreshItems } from '$lib/stores/items';
-	import AuthModal from '$lib/AuthModal.svelte';
+	import AuthModal from '$lib/Auth/AuthModal.svelte';
 	let showAuthModal = $state(false);
 
 	onMount(async () => {

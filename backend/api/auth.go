@@ -117,9 +117,10 @@ func (h *Handler) VerifyAuth(c *gin.Context) {
 			true,
 		)
 		returnUser := gin.H{
-			"name":  user.Name,
-			"email": user.Email,
-			"admin": user.Admin,
+			"name":            user.Name,
+			"email":           user.Email,
+			"admin":           user.Admin,
+			"isAuthenticated": true,
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
@@ -147,6 +148,7 @@ func (h *Handler) getUserByEmail(email string) (models.User, error) {
 
 func (h *Handler) AuthMe(c *gin.Context) {
 	tokenString, err := c.Cookie("auth_token")
+	fmt.Println("Auth token in AuthMe:", tokenString, "Error:", err)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -192,9 +194,10 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		}
 
 		returnUser := gin.H{
-			"name":  user.Name,
-			"email": user.Email,
-			"admin": user.Admin,
+			"name":            user.Name,
+			"email":           user.Email,
+			"admin":           user.Admin,
+			"isAuthenticated": true,
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
@@ -207,4 +210,31 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"message": "Invalid token",
 		})
 	}
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	fmt.Println("Logout endpoint called")
+
+	// Get the existing cookie first to check if it exists
+	existingCookie, err := c.Cookie("auth_token")
+	fmt.Println("Existing auth_token:", existingCookie, "Error:", err)
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+	c.SetCookie(
+		"auth_token",
+		"",
+		-1, // negative maxAge immediately expires the cookie
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	afterCookie, err := c.Cookie("auth_token")
+	fmt.Println("After clearing - auth_token:", afterCookie, "Error:", err)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Logged out successfully",
+	})
 }

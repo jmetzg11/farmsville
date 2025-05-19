@@ -1,7 +1,10 @@
 <script>
 	import { user } from '$lib/stores/auth';
+	import AuthModal from '$lib/Auth/AuthModal.svelte';
 	let { children } = $props();
 	import '../app.css';
+
+	let showAuthModal = $state(false);
 </script>
 
 <div class="min-h-screen flex flex-col">
@@ -19,6 +22,14 @@
 						<a href="/messages" class="hover:text-teal-200 transition-colors">Messages</a>
 					</li>
 					<li><a href="/calendar" class="hover-text-teal-200 transition-colors">Calendar</a></li>
+					<li>
+						<button
+							onclick={() => (showAuthModal = true)}
+							class="hover:text-teal-200 transition-colors cursor-pointer"
+						>
+							{$user.isAuthenticated ? 'Logout' : 'Login'}
+						</button>
+					</li>
 					{#if $user.admin}
 						<li><a href="/admin" class="hover:text-teal-200 transition-colors">Admin</a></li>
 					{/if}
@@ -26,6 +37,8 @@
 			</nav>
 		</div>
 	</header>
+
+	<AuthModal bind:showAuthModal />
 
 	<main class="flex-grow">
 		{@render children()}
