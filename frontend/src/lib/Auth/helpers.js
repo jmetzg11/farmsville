@@ -66,7 +66,3 @@ export function preventNonNumericInput(e) {
 		e.preventDefault();
 	}
 }
-
-export function handleTryAgain(status) {
-	status = 'enter-code';
-}
