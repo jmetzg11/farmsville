@@ -1,6 +1,6 @@
 <script>
 	import { user } from '$lib/stores/auth';
-	import AuthModal from '$lib/Auth/AuthModal.svelte';
+	import AuthModal from '$lib/AuthModal/AuthModal.svelte';
 	let { children } = $props();
 	import '../app.css';
 

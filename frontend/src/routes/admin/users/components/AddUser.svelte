@@ -1,6 +1,6 @@
 <script>
+	import { createUser } from '$lib/api_calls/users.js';
 	let { showAddModal = $bindable(false) } = $props();
-	import { createUser } from './helpers';
 	let user = $state({
 		name: '',
 		email: '',

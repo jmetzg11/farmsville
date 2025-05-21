@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
-	import { refreshUsers, users } from '../users/helpers';
-	import { sendTextMessage } from './helpers';
+	import { refreshUsers, users } from '$lib/stores/users.js';
+	import { sendTextMessage } from '$lib/api_calls/messages.js';
 
 	const validUsers = $derived($users.filter((user) => user.phone.length >= 9));
 	let selectedUsers = $state([]);

@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { refreshUsers, users } from './helpers';
+	import { refreshUsers, users } from '$lib/stores/users';
 	import AddUser from './AddUser.svelte';
 	import EditUser from './EditUser.svelte';
 	import DeleteUser from './DeleteUser.svelte';

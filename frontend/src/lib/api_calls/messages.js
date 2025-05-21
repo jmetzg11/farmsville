@@ -15,5 +15,3 @@ export async function sendTextMessage(numbers, message) {
 		return false;
 	}
 }
-
-// messages

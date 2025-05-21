@@ -1,5 +1,6 @@
 <script>
-	import { makeClaim, formatDate } from './helpers.js';
+	import { formatDate } from '$lib/helpers.js';
+	import { makeClaim } from '$lib/api_calls/customer.js';
 	import { refreshItems } from '$lib/stores/items';
 	let { showClaimModal = $bindable(false), selectedItem = null } = $props();
 	let quantity = $state(1);

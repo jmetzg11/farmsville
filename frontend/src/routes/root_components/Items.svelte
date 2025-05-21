@@ -1,9 +1,9 @@
 <script>
 	import { user } from '$lib/stores/auth';
-	import AuthModal from '$lib/Auth/AuthModal.svelte';
+	import AuthModal from '$lib/AuthModal/AuthModal.svelte';
 	import MakeClaimModal from './MakeClaimModal.svelte';
-	import PhotoModal from './PhotoModal.svelte';
-	import { formatDate } from './helpers.js';
+	import PhotoModal from '../../lib/PhotoModal.svelte';
+	import { formatDate } from '$lib/helpers.js';
 	import { items } from '$lib/stores/items';
 
 	let showAuthModal = $state(false);
