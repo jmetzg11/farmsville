@@ -1,6 +1,8 @@
 <script>
 	import { user } from '$lib/stores/auth';
 	import AuthModal from '$lib/AuthModal/AuthModal.svelte';
+	import Footer from './Footer.svelte';
+
 	let { children } = $props();
 	import '../app.css';
 
@@ -43,4 +45,5 @@
 	<main class="flex-grow">
 		{@render children()}
 	</main>
+	<Footer />
 </div>
