@@ -1,9 +1,9 @@
 <script>
 	import { items } from '$lib/stores/items';
-	import { formatDate } from '$lib/root/helpers';
+	import { formatDate } from './helpers';
 	import EditItemModal from './EditItemModal.svelte';
 	import ClaimItemModal from './ClaimItemModal.svelte';
-	import PhotoModal from '$lib/root/PhotoModal.svelte';
+	import PhotoModal from '../../../root_components/PhotoModal.svelte';
 	let selectedItem = $state(null);
 	let showEditModal = $state(false);
 	let showClaimModal = $state(false);

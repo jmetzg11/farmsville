@@ -33,6 +33,7 @@ type User struct {
 	ID        uint   `gorm:"primaryKey"`
 	Email     string `gorm:"index"`
 	Name      string
+	Password  string
 	Phone     string
 	Admin     bool
 	Code      string
