@@ -60,9 +60,3 @@ export async function logout() {
 		console.error('Network error logging out:', error);
 	}
 }
-
-export function preventNonNumericInput(e) {
-	if (!/[0-9]/.test(e.key)) {
-		e.preventDefault();
-	}
-}

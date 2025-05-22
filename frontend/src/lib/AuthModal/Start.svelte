@@ -1,68 +1,57 @@
 <script>
-	import { emailAuth } from './helpers';
+	let { onClose } = $props();
 
-	let { email = $bindable(''), onSendCode, onClose } = $props();
-	let password = $state('');
-
-	let isLoginValid = $derived(email.includes('@') && email.length >= 5 && password.length >= 2);
-	let isEmailValid = $derived(email.includes('@') && email.length >= 5);
-
-	async function handleSendCode() {
-		const status = await emailAuth(email);
-		onSendCode(status);
-	}
+	const authOptions = [
+		{
+			id: 'auth-code',
+			title: 'Authentication Code',
+			description: 'email or text'
+		},
+		{
+			id: 'login-password',
+			title: 'Login with Password',
+			description: 'Use your email and password'
+		},
+		{
+			id: 'create-account',
+			title: 'Create Account',
+			description: 'First time users'
+		},
+		{
+			id: 'reset-password',
+			title: 'Reset Password',
+			description: 'Forgot or never set'
+		}
+	];
 </script>
 
-<div class="flex flex-col gap-4 mb-6 border-b pb-2">
-	<h2 class="text-lg font-bold text-gray-900 text-center">Send Code to Email</h2>
-	<p class="text-gray-600 text-center">
-		Enter your email address and we'll send you a 6 digit code from a gmail account.
-	</p>
-	<input
-		type="email"
-		bind:value={email}
-		class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-		placeholder="your@email.com"
-	/>
-	<button
-		onclick={handleSendCode}
-		disabled={!isEmailValid}
-		class="py-2 px-4 rounded-md text-white
-		transition-colors duration-200
-		{isEmailValid ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'}"
-	>
-		Send Code
-	</button>
+<div class="container mx-auto p-2">
+	<h1 class="text-2xl font-bold text-gray-800 mb-6 pb-2 text-center">
+		Choose Authentication Method
+	</h1>
+
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		{#each authOptions as option}
+			<button
+				class="bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
+				id={option.id}
+			>
+				<div class="text-center">
+					<h2 class="text-lg font-bold text-gray-800 mb-2">{option.title}</h2>
+					<p class="text-gray-600 text-sm leading-relaxed">
+						{option.description}
+					</p>
+				</div>
+			</button>
+		{/each}
+	</div>
+
+	<div class="flex justify-center mt-8">
+		<button
+			onclick={onClose}
+			class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded transition-colors cursor-pointer w-full"
+		>
+			Cancel
+		</button>
+	</div>
 </div>
-<div class="flex flex-col gap-4 mb-6 border-b pb-2">
-	<h2 class="text-lg font-bold text-gray-900 text-center">Through Email and Password</h2>
-	<p class="text-gray-600 text-center">Create an account or login into an existing account.</p>
-	<input
-		type="email"
-		bind:value={email}
-		class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-		placeholder="your@email.com"
-	/>
-	<input
-		type="text"
-		bind:value={password}
-		class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-		placeholder="your password"
-	/>
-	<button
-		onclick={onClose}
-		class="py-2 px-4 rounded-md text-white
-        transition-colors duration-200
-        {isLoginValid
-			? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-			: 'bg-gray-400 cursor-not-allowed'}"
-	>
-		Login
-	</button>
-</div>
-<button
-	onclick={onClose}
-	class="w-full px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
->
-	Cancel
-</button>

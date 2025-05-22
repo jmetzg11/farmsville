@@ -23,9 +23,9 @@
 	<div
 		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
 	>
-		<div class="bg-white p-6 rounded-lg shadow-lg max-w-34l w-full">
+		<div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
 			{#if status === 'start'}
-				<Start bind:email onSendCode={(newStatus) => (status = newStatus)} onClose={closeModal} />
+				<Start onClose={closeModal} />
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}

@@ -1,5 +1,6 @@
 <script>
-	import { authVerify, preventNonNumericInput } from './helpers';
+	import { authVerify } from '$lib/api_calls/auth';
+	import { preventNonNumericInput } from '$lib/helpers';
 
 	let { email, onSuccess, onError, onClose } = $props();
 

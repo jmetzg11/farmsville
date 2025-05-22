@@ -1,5 +1,5 @@
 <script>
-	import { logout } from './helpers';
+	import { logout } from '$lib/api_calls/auth';
 	let { onCancel } = $props();
 
 	async function handleLogout() {

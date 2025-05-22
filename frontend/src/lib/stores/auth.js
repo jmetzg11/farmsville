@@ -19,7 +19,6 @@ export async function initializeUserStore() {
 		const response = await fetch(url, {
 			credentials: 'include'
 		});
-		console.log('Response:', response);
 		if (response.ok) {
 			const userData = await response.json();
 			console.log('User data:', userData);
