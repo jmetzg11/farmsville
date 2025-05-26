@@ -1,6 +1,7 @@
 <script>
 	import { authenticateUser, user } from '$lib/stores/auth';
 	import Start from './Start.svelte';
+	import AuthenticationCode from './AuthenticationCode.svelte';
 	import EnterCode from './EnterCode.svelte';
 	import Logout from './Logout.svelte';
 	import Error from './Error.svelte';
@@ -25,7 +26,9 @@
 	>
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
 			{#if status === 'start'}
-				<Start onClose={closeModal} />
+				<Start onClose={closeModal} bind:status />
+			{:else if status === 'auth-code'}
+				<AuthenticationCode onClose={closeModal} bind:status />
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}
