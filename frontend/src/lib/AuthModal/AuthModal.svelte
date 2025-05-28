@@ -28,7 +28,7 @@
 			{#if status === 'start'}
 				<Start onClose={closeModal} bind:status />
 			{:else if status === 'auth-code'}
-				<AuthenticationCode onClose={closeModal} bind:status />
+				<AuthenticationCode onClose={() => (status = 'start')} bind:status />
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}
