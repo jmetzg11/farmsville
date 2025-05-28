@@ -182,6 +182,11 @@ func TestAuthMeInvalidToken(t *testing.T) {
 	}
 }
 
+// abstract more from api.auth into auth.auth
+
+func TestLoginWithPassword(t *testing.T) {
+	t.Errorf("Not implemented")
+}
 func TestLogout(t *testing.T) {
 	t.Errorf("Not implemented")
 }

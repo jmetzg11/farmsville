@@ -148,7 +148,6 @@ func (h *Handler) getUserByEmail(email string) (models.User, error) {
 
 func (h *Handler) AuthMe(c *gin.Context) {
 	tokenString, err := c.Cookie("auth_token")
-	fmt.Println("Auth token in AuthMe:", tokenString, "Error:", err)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -210,6 +209,58 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"message": "Invalid token",
 		})
 	}
+}
+
+func (h *Handler) LoginWithPassword(c *gin.Context) {
+	var req models.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if !user.CheckPassword(req.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	token, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	maxAge := 90 * 24 * 60 * 60
+	c.SetCookie(
+		"auth_token",
+		token,
+		maxAge,
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	returnUser := gin.H{
+		"name":            user.Name,
+		"email":           user.Email,
+		"admin":           user.Admin,
+		"isAuthenticated": true,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Login successful",
+		"user":    returnUser,
+	})
 }
 
 func (h *Handler) Logout(c *gin.Context) {

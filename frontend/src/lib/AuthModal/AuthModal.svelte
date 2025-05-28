@@ -2,11 +2,13 @@
 	import { authenticateUser, user } from '$lib/stores/auth';
 	import Start from './Start.svelte';
 	import AuthenticationCode from './AuthenticationCode.svelte';
+	import LoginWithPassword from './LoginWithPassword.svelte';
 	import EnterCode from './EnterCode.svelte';
 	import Logout from './Logout.svelte';
 	import Error from './Error.svelte';
 	let { showAuthModal = $bindable(false) } = $props();
 	let email = $state('');
+	let password = $state('');
 	let status = $state('start');
 
 	function closeModal() {
@@ -28,7 +30,14 @@
 			{#if status === 'start'}
 				<Start onClose={closeModal} bind:status />
 			{:else if status === 'auth-code'}
-				<AuthenticationCode onClose={() => (status = 'start')} bind:status />
+				<AuthenticationCode onClose={() => (status = 'start')} bind:status bind:email />
+			{:else if status === 'login-password'}
+				<LoginWithPassword
+					onClose={() => (status = 'start')}
+					bind:status
+					bind:email
+					bind:password
+				/>
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}

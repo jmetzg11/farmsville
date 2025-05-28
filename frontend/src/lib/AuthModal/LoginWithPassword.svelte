@@ -1,7 +1,16 @@
+<script>
+	let {
+		status = $bindable('login-password'),
+		email = $bindable(''),
+		password = $bindable(''),
+		onClose
+	} = $props();
+</script>
+
 <h1>Login with Password</h1>
 
-<!-- <div class="flex flex-col gap-4 mb-6 border-b pb-2">
-	<h2 class="text-lg font-bold text-gray-900 text-center">Through Email and Password</h2>
+<div class="flex flex-col gap-4 mb-6 border-b pb-2">
+	<!-- <h2 class="text-lg font-bold text-gray-900 text-center">Through Email and Password</h2>
 	<p class="text-gray-600 text-center">Create an account or login into an existing account.</p>
 	<input
 		type="email"
@@ -24,5 +33,6 @@
 			: 'bg-gray-400 cursor-not-allowed'}"
 	>
 		Login
-	</button>
-</div> -->
+	</button> -->
+	<button onclick={onClose}>Cancel</button>
+</div>

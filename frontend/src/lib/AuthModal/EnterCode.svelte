@@ -16,6 +16,7 @@
 
 	async function handleCodeSubmit() {
 		const result = await authVerify(email, code);
+		console.log('result', result);
 		if (result.status === 'success') {
 			onSuccess(result);
 		} else {

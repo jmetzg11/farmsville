@@ -28,6 +28,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.POST("/auth", handler.SendAuth)
 		apiRouter.POST("/auth/verify", handler.VerifyAuth)
 		apiRouter.GET("/auth/me", handler.AuthMe)
+		apiRouter.POST("/auth/login", handler.LoginWithPassword)
 		apiRouter.GET("/auth/logout", handler.Logout)
 
 		authRoutes := apiRouter.Group("/")

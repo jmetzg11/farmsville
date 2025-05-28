@@ -5,26 +5,22 @@
 		{
 			id: 'auth-code',
 			title: 'Authentication Code',
-			description: 'email or text',
-			status: 'auth-code'
+			description: 'email or text'
 		},
 		{
 			id: 'login-password',
 			title: 'Login with Password',
-			description: 'Use your email and password',
-			status: 'login-password'
+			description: 'Use your email and password'
 		},
 		{
 			id: 'create-account',
 			title: 'Create Account',
-			description: 'First time users',
-			status: 'create-account'
+			description: 'First time users'
 		},
 		{
 			id: 'reset-password',
 			title: 'Reset Password',
-			description: 'Forgot or never set',
-			status: 'reset-password'
+			description: 'Forgot or never set'
 		}
 	];
 </script>
@@ -37,7 +33,7 @@
 			<button
 				class="bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
 				id={option.id}
-				onclick={() => (status = option.status)}
+				onclick={() => (status = option.id)}
 			>
 				<div class="text-center">
 					<h2 class="text-lg font-bold text-gray-800 mb-2">{option.title}</h2>
