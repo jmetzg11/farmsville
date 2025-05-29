@@ -41,11 +41,34 @@ export async function authVerify(email, code) {
 			const data = await response.json();
 			return { status: 'success', user: data.user };
 		} else {
-			return { status: 'error', message: 'Invalid code' };
+			return { status: 'error' };
 		}
 	} catch (error) {
 		console.error('Network error sending auth code:', error);
-		return { status: 'error', message: 'Network error sending auth code' };
+		return { status: 'error' };
+	}
+}
+
+export async function login(email, password) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/auth/login`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify({ email: email.toLowerCase(), password })
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			return { status: 'success', user: data.user };
+		} else {
+			return { status: 'error' };
+		}
+	} catch {
+		return { status: 'error' };
 	}
 }
 

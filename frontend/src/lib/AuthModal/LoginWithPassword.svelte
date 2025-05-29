@@ -1,7 +1,11 @@
 <script>
+	import { login } from '$lib/api_calls/auth';
+
 	let {
+		onSuccess,
 		status = $bindable('login-password'),
 		previousStatus = $bindable('start'),
+		message = $bindable(''),
 		onClose
 	} = $props();
 
@@ -11,14 +15,14 @@
 	let isEmailValid = $derived(email.includes('@') && email.length >= 5);
 	let isPasswordValid = $derived(password.length >= 0);
 	async function handleLogin() {
-		console.log('email', email);
-		console.log('password', password);
-		// const result = await login(email, password);
-		// if (result.status === 'success') {
-		// 	status = 'enter-code';
-		// } else {
-		// 	status = 'error';
-		// }
+		const result = await login(email, password);
+		if (result.status === 'success') {
+			onSuccess(result.user);
+		} else {
+			status = 'error';
+			message = 'Invalid email or password. Please try again.';
+			previousStatus = 'login-password';
+		}
 	}
 </script>
 
@@ -38,12 +42,13 @@
 	/>
 	<button
 		onclick={handleLogin}
-		disabled={!isEmailValid}
-		class="py-2 px-4 rounded-md text-white transition-colors duration-200 {isEmailValid
+		disabled={!isEmailValid || !isPasswordValid}
+		class="py-2 px-4 rounded-md text-white transition-colors duration-200 {isEmailValid &&
+		isPasswordValid
 			? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
 			: 'bg-gray-400 cursor-not-allowed'}"
 	>
-		Send Code
+		Login
 	</button>
 	<button
 		onclick={onClose}

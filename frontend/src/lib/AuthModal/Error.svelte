@@ -1,8 +1,6 @@
 <script>
 	let { status = $bindable('error'), onClose, message, previousStatus } = $props();
 
-	console.log(message);
-
 	function onTryAgain() {
 		status = previousStatus;
 	}

@@ -4,6 +4,7 @@
 	import AuthenticationCode from './AuthenticationCode.svelte';
 	import LoginWithPassword from './LoginWithPassword.svelte';
 	import EnterCode from './EnterCode.svelte';
+	import CreateAccount from './CreateAccount.svelte';
 	import Logout from './Logout.svelte';
 	import Error from './Error.svelte';
 	let { showAuthModal = $bindable(false) } = $props();
@@ -40,19 +41,30 @@
 					bind:previousStatus
 				/>
 			{:else if status === 'login-password'}
-				<LoginWithPassword bind:status bind:previousStatus onClose={closeModal} />
+				<LoginWithPassword
+					onSuccess={(user) => {
+						authenticateUser(user);
+						closeModal();
+					}}
+					bind:status
+					bind:previousStatus
+					bind:message
+					onClose={() => (status = 'start')}
+				/>
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}
-					onSuccess={(result) => {
-						authenticateUser(result.user);
+					onSuccess={(user) => {
+						authenticateUser(user);
 						closeModal();
 					}}
-					onClose={closeModal}
+					onClose={() => (status = 'start')}
 					bind:status
 					bind:message
 					bind:previousStatus
 				/>
+			{:else if status == 'create-account'}
+				<CreateAccount onClose={() => (status = 'start')} bind:status />
 			{:else if status === 'logout'}
 				<Logout onCancel={() => (showAuthModal = false)} />
 			{:else if status === 'error'}
