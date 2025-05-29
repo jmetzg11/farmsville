@@ -1,8 +1,14 @@
 <script>
-	let { onTryAgain, onClose } = $props();
+	let { status = $bindable('error'), onClose, message, previousStatus } = $props();
+
+	console.log(message);
+
+	function onTryAgain() {
+		status = previousStatus;
+	}
 </script>
 
-<p class="text-red-600 mb-4">Invalid code. Please try again.</p>
+<p class="text-red-600 mb-4">{message}.</p>
 <div class="flex gap-2 justify-between mt-4">
 	<button
 		onclick={onTryAgain}

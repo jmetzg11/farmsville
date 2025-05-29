@@ -8,12 +8,14 @@
 	import Error from './Error.svelte';
 	let { showAuthModal = $bindable(false) } = $props();
 	let email = $state('');
-	let password = $state('');
+	let message = $state('');
 	let status = $state('start');
+	let previousStatus = $state('start');
 
 	function closeModal() {
 		showAuthModal = false;
 		email = '';
+		message = '';
 		status = 'start';
 	}
 
@@ -30,14 +32,15 @@
 			{#if status === 'start'}
 				<Start onClose={closeModal} bind:status />
 			{:else if status === 'auth-code'}
-				<AuthenticationCode onClose={() => (status = 'start')} bind:status bind:email />
-			{:else if status === 'login-password'}
-				<LoginWithPassword
+				<AuthenticationCode
 					onClose={() => (status = 'start')}
 					bind:status
 					bind:email
-					bind:password
+					bind:message
+					bind:previousStatus
 				/>
+			{:else if status === 'login-password'}
+				<LoginWithPassword bind:status bind:previousStatus onClose={closeModal} />
 			{:else if status === 'enter-code'}
 				<EnterCode
 					{email}
@@ -45,13 +48,15 @@
 						authenticateUser(result.user);
 						closeModal();
 					}}
-					onError={() => (status = 'error')}
 					onClose={closeModal}
+					bind:status
+					bind:message
+					bind:previousStatus
 				/>
 			{:else if status === 'logout'}
 				<Logout onCancel={() => (showAuthModal = false)} />
 			{:else if status === 'error'}
-				<Error onTryAgain={() => (status = 'start')} onClose={closeModal} />
+				<Error bind:status onClose={closeModal} {message} {previousStatus} />
 			{/if}
 		</div>
 	</div>

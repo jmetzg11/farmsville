@@ -1,12 +1,25 @@
 <script>
 	import { emailAuth } from '$lib/api_calls/auth';
 
-	let { status = $bindable('auth-code'), email = $bindable(''), onClose } = $props();
+	let {
+		onClose,
+		status = $bindable('auth-code'),
+		email = $bindable(''),
+		message = $bindable(''),
+		previousStatus = $bindable('start')
+	} = $props();
 
 	let isEmailValid = $derived(email.includes('@') && email.length >= 5);
 
 	async function handleSendCode() {
-		status = await emailAuth(email);
+		const result = await emailAuth(email);
+		if (result === 'enter-code') {
+			status = 'enter-code';
+		} else {
+			message = 'Invalid email address. Please try again.';
+			previousStatus = 'auth-code';
+			status = 'error';
+		}
 	}
 </script>
 

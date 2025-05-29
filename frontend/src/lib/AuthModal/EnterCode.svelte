@@ -2,7 +2,14 @@
 	import { authVerify } from '$lib/api_calls/auth';
 	import { preventNonNumericInput } from '$lib/helpers';
 
-	let { email, onSuccess, onError, onClose } = $props();
+	let {
+		email,
+		onSuccess,
+		onClose,
+		status = $bindable('enter-code'),
+		message = $bindable(''),
+		previousStatus = $bindable('start')
+	} = $props();
 
 	let code = $state('');
 
@@ -20,7 +27,9 @@
 		if (result.status === 'success') {
 			onSuccess(result);
 		} else {
-			onError();
+			status = 'error';
+			message = 'Invalid code. Please try again.';
+			previousStatus = 'enter-code';
 		}
 		code = '';
 	}

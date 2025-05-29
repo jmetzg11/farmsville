@@ -1,17 +1,29 @@
 <script>
 	let {
 		status = $bindable('login-password'),
-		email = $bindable(''),
-		password = $bindable(''),
+		previousStatus = $bindable('start'),
 		onClose
 	} = $props();
+
+	let email = $state('');
+	let password = $state('');
+
+	let isEmailValid = $derived(email.includes('@') && email.length >= 5);
+	let isPasswordValid = $derived(password.length >= 0);
+	async function handleLogin() {
+		console.log('email', email);
+		console.log('password', password);
+		// const result = await login(email, password);
+		// if (result.status === 'success') {
+		// 	status = 'enter-code';
+		// } else {
+		// 	status = 'error';
+		// }
+	}
 </script>
 
-<h1>Login with Password</h1>
-
-<div class="flex flex-col gap-4 mb-6 border-b pb-2">
-	<!-- <h2 class="text-lg font-bold text-gray-900 text-center">Through Email and Password</h2>
-	<p class="text-gray-600 text-center">Create an account or login into an existing account.</p>
+<div class="flex flex-col gap-4 mb-6 pb-2">
+	<h2 class="text-lg font-bold text-gray-900 text-center">Login with Password</h2>
 	<input
 		type="email"
 		bind:value={email}
@@ -22,17 +34,21 @@
 		type="text"
 		bind:value={password}
 		class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-		placeholder="your password"
+		placeholder="password"
 	/>
 	<button
-		onclick={onClose}
-		class="py-2 px-4 rounded-md text-white
-        transition-colors duration-200
-        {isLoginValid
+		onclick={handleLogin}
+		disabled={!isEmailValid}
+		class="py-2 px-4 rounded-md text-white transition-colors duration-200 {isEmailValid
 			? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
 			: 'bg-gray-400 cursor-not-allowed'}"
 	>
-		Login
-	</button> -->
-	<button onclick={onClose}>Cancel</button>
+		Send Code
+	</button>
+	<button
+		onclick={onClose}
+		class="py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
+	>
+		Cancel
+	</button>
 </div>
