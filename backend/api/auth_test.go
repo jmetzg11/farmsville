@@ -187,6 +187,11 @@ func TestAuthMeInvalidToken(t *testing.T) {
 func TestLoginWithPassword(t *testing.T) {
 	t.Errorf("Not implemented")
 }
+
+func TestCreateAccount(t *testing.T) {
+	t.Errorf("Not implemented")
+}
+
 func TestLogout(t *testing.T) {
 	t.Errorf("Not implemented")
 }

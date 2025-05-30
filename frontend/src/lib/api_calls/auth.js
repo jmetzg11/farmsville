@@ -72,6 +72,24 @@ export async function login(email, password) {
 	}
 }
 
+export async function createAccount(name, phone, email, password) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/auth/create`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify({ name, phone, email, password })
+		});
+
+		return await response.json();
+	} catch {
+		return { status: 'error', message: 'Network error' };
+	}
+}
+
 export async function logout() {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/auth/logout`;

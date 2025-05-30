@@ -64,7 +64,16 @@
 					bind:previousStatus
 				/>
 			{:else if status == 'create-account'}
-				<CreateAccount onClose={() => (status = 'start')} bind:status />
+				<CreateAccount
+					onSuccess={(user) => {
+						authenticateUser(user);
+						closeModal;
+					}}
+					onClose={() => (status = 'start')}
+					bind:status
+					bind:message
+					bind:previousStatus
+				/>
 			{:else if status === 'logout'}
 				<Logout onCancel={() => (showAuthModal = false)} />
 			{:else if status === 'error'}

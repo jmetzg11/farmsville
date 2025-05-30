@@ -1,5 +1,13 @@
 <script>
-	let { onClose, status = $bindable('create-account') } = $props();
+	import { createAccount } from '$lib/api_calls/auth';
+
+	let {
+		onSuccess,
+		onClose,
+		status = $bindable('create-account'),
+		message = $bindable(''),
+		previousStatus = $bindable('')
+	} = $props();
 
 	let email = $state('');
 	let password = $state('');
@@ -10,7 +18,15 @@
 	let isPasswordValid = $derived(password.length > 0);
 
 	async function handleCreateAccount() {
-		console.log('create account');
+		email = email.toLowerCase();
+		const result = await createAccount(name, phone, email, password);
+		if (result.status === 'success') {
+			onSuccess(result.user);
+		} else {
+			message = result.message;
+			previousStatus = 'create-account';
+			status = 'error';
+		}
 	}
 </script>
 

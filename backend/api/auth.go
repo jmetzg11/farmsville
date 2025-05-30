@@ -263,6 +263,45 @@ func (h *Handler) LoginWithPassword(c *gin.Context) {
 	})
 }
 
+type CreateAccountRequest struct {
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (h *Handler) CreateAccount(c *gin.Context) {
+	var req CreateAccountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	var existingUser models.User
+	result := h.db.Where("email = ?", req.Email).First(&existingUser)
+	if result.Error == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "Account already exists",
+		})
+		return
+	}
+
+	if result.Error != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Internal Error. Contact Admin",
+		})
+	}
+
+	fmt.Println(req)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Account created successfully",
+	})
+}
+
 func (h *Handler) Logout(c *gin.Context) {
 	isProduction := os.Getenv("GIN_MODE") == "release"
 	c.SetCookie(
