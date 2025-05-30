@@ -20,9 +20,11 @@
 	async function handleCreateAccount() {
 		email = email.toLowerCase();
 		const result = await createAccount(name, phone, email, password);
-		if (result.status === 'success') {
+		if (result.success) {
 			onSuccess(result.user);
+			console.log('I was successful');
 		} else {
+			console.log('I was not successful');
 			message = result.message;
 			previousStatus = 'create-account';
 			status = 'error';

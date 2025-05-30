@@ -294,11 +294,57 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 		})
 	}
 
-	fmt.Println(req)
+	user := models.User{
+		Name:  req.Name,
+		Phone: req.Phone,
+		Email: req.Email,
+		Admin: false,
+	}
+	if err := user.SetPassword(req.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"sucesss": false,
+			"message": "Failed to process password",
+		})
+		return
+	}
+
+	if err := h.db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to create account",
+		})
+	}
+
+	token, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	maxAge := 90 * 24 * 60 * 60
+	c.SetCookie(
+		"auth_token",
+		token,
+		maxAge,
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	returnUser := gin.H{
+		"name":            user.Name,
+		"email":           user.Email,
+		"admin":           user.Admin,
+		"isAuthenticated": true,
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Account created successfully",
+		"user":    returnUser,
 	})
 }
 
