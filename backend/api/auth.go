@@ -348,6 +348,74 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 	})
 }
 
+func (h *Handler) SendCodeToResetPassword(c *gin.Context) {
+	var req models.Email
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Account does not exist. Please create an account.",
+		})
+		return
+	}
+
+	authCode, err := h.authService.GenerateRandomCode()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to generate authentication code",
+		})
+		return
+	}
+
+	expiresAt := time.Now().Add(15 * time.Minute)
+	user.Code = authCode
+	user.ExpiresAt = expiresAt
+
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update user",
+		})
+		return
+	}
+
+	err = h.authService.SendEmailWithAuthCode(req.Email, authCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to send email",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Password reset email sent",
+	})
+}
+
+func (h *Handler) ResetPassword(c *gin.Context) {
+	var req models.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Printf("Binding error: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": fmt.Sprintf("Invalid request body: %v", err)})
+		return
+	}
+
+	fmt.Println(req)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Password reset successful",
+	})
+}
+
 func (h *Handler) Logout(c *gin.Context) {
 	isProduction := os.Getenv("GIN_MODE") == "release"
 	c.SetCookie(

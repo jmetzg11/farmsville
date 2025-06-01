@@ -192,6 +192,10 @@ func TestCreateAccount(t *testing.T) {
 	t.Errorf("Not implemented")
 }
 
+func TestSendCodeToResetPassword(t *testing.T) {
+	t.Errorf("Not implemented")
+}
+
 func TestLogout(t *testing.T) {
 	t.Errorf("Not implemented")
 }

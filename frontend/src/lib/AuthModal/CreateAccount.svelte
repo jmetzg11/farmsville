@@ -22,9 +22,7 @@
 		const result = await createAccount(name, phone, email, password);
 		if (result.success) {
 			onSuccess(result.user);
-			console.log('I was successful');
 		} else {
-			console.log('I was not successful');
 			message = result.message;
 			previousStatus = 'create-account';
 			status = 'error';

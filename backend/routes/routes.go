@@ -30,6 +30,8 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.GET("/auth/me", handler.AuthMe)
 		apiRouter.POST("/auth/login", handler.LoginWithPassword)
 		apiRouter.POST("/auth/create", handler.CreateAccount)
+		apiRouter.POST("/auth/code-to-reset-password", handler.SendCodeToResetPassword)
+		apiRouter.POST("/auth/reset-password", handler.ResetPassword)
 		apiRouter.GET("/auth/logout", handler.Logout)
 
 		authRoutes := apiRouter.Group("/")

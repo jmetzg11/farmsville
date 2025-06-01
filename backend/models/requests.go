@@ -1,7 +1,7 @@
 package models
 
 type Email struct {
-	Email string `json:"email"`
+	Email string `json:"email" binding:"required"`
 }
 
 type AuthRequest struct {
@@ -11,6 +11,12 @@ type AuthRequest struct {
 
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type ResetPasswordRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Code     string `json:"code" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 

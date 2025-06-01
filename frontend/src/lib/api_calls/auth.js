@@ -90,6 +90,40 @@ export async function createAccount(name, phone, email, password) {
 	}
 }
 
+export async function sendCodeToResetPassword(email) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/auth/code-to-reset-password`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email })
+		});
+		return await response.json();
+	} catch {
+		return { status: 'error', message: 'Network error' };
+	}
+}
+
+export async function resetPassword(email, code, password) {
+	console.log('resetPassword', email, typeof email, code, typeof code, password, typeof password);
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/auth/reset-password`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify({ email, code, password })
+		});
+		return await response.json();
+	} catch {
+		return { status: 'error', message: 'Network error' };
+	}
+}
+
 export async function logout() {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/auth/logout`;

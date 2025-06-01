@@ -1,9 +1,8 @@
 <script>
 	import { authenticateUser, user } from '$lib/stores/auth';
 	import Start from './Start.svelte';
-	import AuthenticationCode from './AuthenticationCode.svelte';
+	import AuthCode from './AuthCode.svelte';
 	import LoginWithPassword from './LoginWithPassword.svelte';
-	import EnterCode from './EnterCode.svelte';
 	import CreateAccount from './CreateAccount.svelte';
 	import ResetPassword from './ResetPassword.svelte';
 	import Logout from './Logout.svelte';
@@ -33,9 +32,13 @@
 		<div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
 			{#if status === 'start'}
 				<Start onClose={closeModal} bind:status />
-			{:else if status === 'auth-code'}
-				<AuthenticationCode
+			{:else if ['auth-code', 'enter-code'].includes(status)}
+				<AuthCode
 					onClose={() => (status = 'start')}
+					onSuccess={(user) => {
+						authenticateUser(user);
+						closeModal();
+					}}
 					bind:status
 					bind:email
 					bind:message
@@ -52,18 +55,6 @@
 					bind:message
 					onClose={() => (status = 'start')}
 				/>
-			{:else if status === 'enter-code'}
-				<EnterCode
-					{email}
-					onSuccess={(user) => {
-						authenticateUser(user);
-						closeModal();
-					}}
-					onClose={() => (status = 'start')}
-					bind:status
-					bind:message
-					bind:previousStatus
-				/>
 			{:else if status == 'create-account'}
 				<CreateAccount
 					onSuccess={(user) => {
@@ -75,7 +66,15 @@
 					bind:message
 					bind:previousStatus
 				/>
-			{:else if status === 'reset-password'}<ResetPassword />{:else if status === 'logout'}
+			{:else if ['reset-password', 'enter-code-and-password'].includes(status)}
+				<ResetPassword
+					{email}
+					onClose={() => (status = 'start')}
+					bind:status
+					bind:message
+					bind:previousStatus
+				/>
+			{:else if status === 'logout'}
 				<Logout onCancel={() => (showAuthModal = false)} />
 			{:else if status === 'error'}
 				<Error bind:status onClose={closeModal} {message} {previousStatus} />
