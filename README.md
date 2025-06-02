@@ -9,6 +9,10 @@ A friendly neighborhood tool for small-scale producers to manage and communicate
 - Order management
 - Email notifications
 
+| Customers                                        | Admin                                        |
+| ------------------------------------------------ | -------------------------------------------- |
+| ![Dashboard](frontend/static/customer_photo.png) | ![Products](frontend/static/admin_photo.png) |
+
 ## 🚀 Quick Start
 
 ### Prerequisites
