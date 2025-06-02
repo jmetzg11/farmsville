@@ -14,6 +14,13 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type CreateAccountRequest struct {
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type ResetPasswordRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Code     string `json:"code" binding:"required"`

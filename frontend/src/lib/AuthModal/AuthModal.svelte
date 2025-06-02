@@ -69,6 +69,10 @@
 			{:else if ['reset-password', 'enter-code-and-password'].includes(status)}
 				<ResetPassword
 					{email}
+					onSuccess={(user) => {
+						authenticateUser(user);
+						closeModal();
+					}}
 					onClose={() => (status = 'start')}
 					bind:status
 					bind:message

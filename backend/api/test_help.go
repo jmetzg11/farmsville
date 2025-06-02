@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func setupTestDB(t *testing.T) *gorm.DB {
@@ -19,7 +20,9 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	// Each test will get its own isolated database
 	dbID := fmt.Sprintf("file:memdb%d?mode=memory&cache=shared", time.Now().UnixNano())
 
-	db, err := gorm.Open(sqlite.Open(dbID), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(dbID), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,10 +76,15 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	router.GET("/items", handler.GetItems)
 	authGroup.POST("/claim", handler.MakeClaim)
 
-	// users
-	router.POST("/auth/send", handler.SendAuth)
+	// auth
+	router.POST("/auth", handler.SendAuth)
 	router.POST("/auth/verify", handler.VerifyAuth)
 	router.GET("/auth/me", handler.AuthMe)
+	router.POST("/auth/login", handler.LoginWithPassword)
+	router.POST("/auth/create", handler.CreateAccount)
+	router.POST("/auth/code-to-reset-password", handler.SendCodeToResetPassword)
+	router.POST("/auth/reset-password", handler.ResetPassword)
+	router.GET("/auth/logout", handler.Logout)
 
 	return router
 }

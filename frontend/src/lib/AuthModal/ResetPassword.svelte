@@ -4,6 +4,7 @@
 
 	let {
 		email,
+		onSuccess,
 		onClose,
 		status = $bindable('reset-password'),
 		message = $bindable(''),
@@ -22,7 +23,6 @@
 		email = email.toLowerCase();
 		const result = await sendCodeToResetPassword(email);
 		if (result.success) {
-			console.log('success', result);
 			status = 'enter-code-and-password';
 		} else {
 			message = result.message;
@@ -39,7 +39,13 @@
 
 	async function handleResetPassword() {
 		const result = await resetPassword(email, code, password);
-		console.log(result);
+		if (result.success) {
+			onSuccess(result.user);
+		} else {
+			message = result.message;
+			previousStatus = 'reset-password';
+			status = 'error';
+		}
 	}
 </script>
 

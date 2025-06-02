@@ -107,7 +107,6 @@ export async function sendCodeToResetPassword(email) {
 }
 
 export async function resetPassword(email, code, password) {
-	console.log('resetPassword', email, typeof email, code, typeof code, password, typeof password);
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/auth/reset-password`;
 		const response = await fetch(url, {
