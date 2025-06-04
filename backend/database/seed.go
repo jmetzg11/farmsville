@@ -51,8 +51,8 @@ func seedDB(db *gorm.DB) {
 			CreatedAt: time.Now(),
 		},
 		{
-			Email:     "robert.brown@example.com",
-			Name:      "Robert Brown",
+			Email:     "admin@example.com",
+			Name:      "Admin",
 			Admin:     true, // Admin user
 			Code:      "admincode",
 			ExpiresAt: time.Now().AddDate(1, 0, 0),
