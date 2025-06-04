@@ -57,27 +57,29 @@ air
 
 This creates a `data/` directory for the database and static files.
 
-**Default login**: `admin@example.com` / `admin`
+### Seed Data Users
+
+The following test accounts are automatically created for development:
+
+| Role     | Email                    | Password   |
+| -------- | ------------------------ | ---------- |
+| Admin    | `admin@example.com`      | `admin`    |
+| Customer | `john.doe@example.com`   | `password` |
+| Customer | `jane.smith@example.com` | `password` |
 
 ## 🐳 Docker Deployment
 
 ### Build and Run
 
 ```bash
-# Build frontend
-cd frontend && npm run build && cd ..
-
-# Build for Linux
-CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC="musl-gcc" go build -o main .
-
 # Docker commands
 docker build -t farmsville .
-docker run -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env farmsville
+docker run -p 3000:3000 -v $(pwd)/data:/app/data -v $(pwd)/.env:/app/.env farmsville
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! You'll notice a long list of issues. Here's how to get started:
+Contributions are welcome! You'll notice a long list of issues or you will probably find issues on your own.
 
 ### Development Process
 
@@ -98,13 +100,7 @@ We welcome contributions from the community! You'll notice a long list of issues
 
 ## 🐛 Issues
 
-Found a bug or have a feature request? We'd love to hear from you!
-
-### Before Submitting
-
-- **Search** existing issues to avoid duplicates
-- **Check** if it's already fixed in the latest version
-- **Test** with a fresh installation if possible
+Found a bug or have a feature request?
 
 ### Bug Reports
 
