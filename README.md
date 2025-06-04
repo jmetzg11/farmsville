@@ -32,7 +32,7 @@ A friendly neighborhood tool for small-scale producers to manage and communicate
 
 ### 1. Email Configuration
 
-Set up Gmail app password following <a href="https://support.google.com/mail/answer/185833?hl=en" target="_blank">Google's guide</a>, then:
+Set up Gmail app password following [Google's guide](https://support.google.com/mail/answer/185833?hl=en), then:
 
 ```bash
 cp .env.example .env
