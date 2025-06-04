@@ -1,0 +1,29 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23.1"
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: |
+          export GMAIL_USER="${{ secrets.GMAIL_USER }}"
+          export GMAIL_PASS="${{ secrets.GMAIL_PASS }}"
+          export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          go test -v ./...

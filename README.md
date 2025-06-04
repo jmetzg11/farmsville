@@ -17,7 +17,7 @@ A friendly neighborhood tool for small-scale producers to manage and communicate
 
 ### Prerequisites
 
-- Node.js (for frontend)
+- Node.js 22.5.1+ (for frontend)
 - Go 1.19+ (for backend)
 - Gmail account with app password (for email features)
 
