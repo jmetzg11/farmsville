@@ -62,6 +62,7 @@ func seedDB(db *gorm.DB) {
 
 	// Insert users
 	for i := range users {
+		users[i].SetPassword("password123")
 		result := db.Create(&users[i])
 		if result.Error != nil {
 			log.Printf("Error creating user: %v", result.Error)

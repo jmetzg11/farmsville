@@ -1,9 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
-	import { formatDate } from '$lib/root/helpers.js';
-	import { claimItem } from './helpers.js';
+	import { formatDate } from '$lib/helpers.js';
+	import { claimItem } from '$lib/api_calls/admin_items.js';
 	import { refreshItems } from '$lib/stores/items';
-	import { users, refreshUsers } from '../users/helpers.js';
+	import { users, refreshUsers } from '$lib/stores/users';
 	let { showClaimModal = $bindable(false), selectedItem = null } = $props();
 
 	let amount = $state(0);

@@ -1,6 +1,6 @@
 <script>
-	import { formatDate } from '$lib/root/helpers.js';
-	import { editItem, removeItem } from './helpers.js';
+	import { formatDate } from '$lib/helpers.js';
+	import { editItem, removeItem } from '$lib/api_calls/admin_items.js';
 	import { refreshItems } from '$lib/stores/items';
 	let { showEditModal = $bindable(false), selectedItem = null } = $props();
 

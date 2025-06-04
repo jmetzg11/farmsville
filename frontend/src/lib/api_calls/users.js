@@ -1,11 +1,4 @@
-import { writable } from 'svelte/store';
-
-export const users = writable([]);
-
-export async function refreshUsers() {
-	const freshUsers = await getUsers();
-	users.set(freshUsers);
-}
+import { refreshUsers } from '$lib/stores/users';
 
 export async function getUsers() {
 	try {

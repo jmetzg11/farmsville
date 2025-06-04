@@ -1,6 +1,6 @@
 <script>
 	import { refreshItems } from '$lib/stores/items';
-	import { createItem } from './helpers.js';
+	import { createItem } from '$lib/api_calls/admin_items.js';
 
 	const DEFAULT_ITEM = {
 		title: '',

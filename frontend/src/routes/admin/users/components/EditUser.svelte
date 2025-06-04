@@ -1,5 +1,5 @@
 <script>
-	import { updateUser } from './helpers';
+	import { updateUser } from '$lib/api_calls/users.js';
 	let { showEditModal = $bindable(false), selectedUser = $bindable({}) } = $props();
 
 	function closeModal() {

@@ -1,6 +1,6 @@
 <script>
+	import { deleteUser } from '$lib/api_calls/users.js';
 	let { showDeleteModal = $bindable(false), selectedUser } = $props();
-	import { deleteUser } from './helpers';
 
 	function closeModal() {
 		showDeleteModal = false;

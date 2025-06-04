@@ -1,7 +1,7 @@
 <script>
-	import { formatDate } from '../../root/helpers.js';
+	import { formatDate } from '$lib/helpers.js';
 	import { claimedItems } from '$lib/stores/items';
-	import { removeClaimedItem } from './helpers.js';
+	import { removeClaimedItem } from '$lib/api_calls/admin_items.js';
 	import { refreshItems } from '$lib/stores/items';
 
 	async function handleRemove(itemId) {

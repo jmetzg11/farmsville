@@ -117,9 +117,10 @@ func (h *Handler) VerifyAuth(c *gin.Context) {
 			true,
 		)
 		returnUser := gin.H{
-			"name":  user.Name,
-			"email": user.Email,
-			"admin": user.Admin,
+			"name":            user.Name,
+			"email":           user.Email,
+			"admin":           user.Admin,
+			"isAuthenticated": true,
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
@@ -192,9 +193,10 @@ func (h *Handler) AuthMe(c *gin.Context) {
 		}
 
 		returnUser := gin.H{
-			"name":  user.Name,
-			"email": user.Email,
-			"admin": user.Admin,
+			"name":            user.Name,
+			"email":           user.Email,
+			"admin":           user.Admin,
+			"isAuthenticated": true,
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
@@ -207,4 +209,274 @@ func (h *Handler) AuthMe(c *gin.Context) {
 			"message": "Invalid token",
 		})
 	}
+}
+
+func (h *Handler) LoginWithPassword(c *gin.Context) {
+	var req models.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	if !user.CheckPassword(req.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	token, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	maxAge := 90 * 24 * 60 * 60
+	c.SetCookie(
+		"auth_token",
+		token,
+		maxAge,
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	returnUser := gin.H{
+		"name":            user.Name,
+		"email":           user.Email,
+		"admin":           user.Admin,
+		"isAuthenticated": true,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Login successful",
+		"user":    returnUser,
+	})
+}
+
+func (h *Handler) CreateAccount(c *gin.Context) {
+	var req models.CreateAccountRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	var existingUser models.User
+	result := h.db.Where("email = ?", req.Email).First(&existingUser)
+	if result.Error == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"success": false,
+			"message": "Account already exists",
+		})
+		return
+	}
+
+	if result.Error != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Internal Error. Contact Admin",
+		})
+		return
+	}
+
+	user := models.User{
+		Name:  req.Name,
+		Phone: req.Phone,
+		Email: req.Email,
+		Admin: false,
+	}
+
+	if err := user.SetPassword(req.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to process password",
+		})
+		return
+	}
+
+	if err := h.db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to create account",
+		})
+		return
+	}
+
+	token, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	maxAge := 90 * 24 * 60 * 60
+	c.SetCookie(
+		"auth_token",
+		token,
+		maxAge,
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	returnUser := gin.H{
+		"name":            user.Name,
+		"email":           user.Email,
+		"admin":           user.Admin,
+		"isAuthenticated": true,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Account created successfully",
+		"user":    returnUser,
+	})
+}
+
+func (h *Handler) SendCodeToResetPassword(c *gin.Context) {
+	var req models.Email
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "Account does not exist. Please create an account.",
+		})
+		return
+	}
+
+	authCode, err := h.authService.GenerateRandomCode()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to generate authentication code",
+		})
+		return
+	}
+
+	expiresAt := time.Now().Add(15 * time.Minute)
+	user.Code = authCode
+	user.ExpiresAt = expiresAt
+
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update user",
+		})
+		return
+	}
+
+	err = h.authService.SendEmailWithAuthCode(req.Email, authCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to send email",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Password reset email sent",
+	})
+}
+
+func (h *Handler) ResetPassword(c *gin.Context) {
+	var req models.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": fmt.Sprintf("Invalid request body: %v", err)})
+		return
+	}
+
+	user, err := h.getUserByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "User not found"})
+		return
+	}
+
+	if user.Code != req.Code || user.ExpiresAt.Before(time.Now()) {
+		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Invalid or expired reset code"})
+		return
+	}
+
+	if err := user.SetPassword(req.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to process password",
+		})
+		return
+	}
+
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to update password",
+		})
+		return
+	}
+
+	token, err := h.authService.GenerateJWT(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	isProduction := os.Getenv("GIN_MODE") == "release"
+
+	maxAge := 90 * 24 * 60 * 60
+	c.SetCookie(
+		"auth_token",
+		token,
+		maxAge,
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	returnUser := gin.H{
+		"name":            user.Name,
+		"email":           user.Email,
+		"admin":           user.Admin,
+		"isAuthenticated": true,
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Password reset successful",
+		"user":    returnUser,
+	})
+}
+
+func (h *Handler) Logout(c *gin.Context) {
+	isProduction := os.Getenv("GIN_MODE") == "release"
+	c.SetCookie(
+		"auth_token",
+		"",
+		-1, // negative maxAge immediately expires the cookie
+		"/",
+		"",
+		isProduction,
+		true,
+	)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Logged out successfully",
+	})
 }
