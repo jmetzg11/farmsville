@@ -23,7 +23,7 @@ func seedDB(db *gorm.DB) {
 			Name:      "John Doe",
 			Admin:     false,
 			Code:      "user1code",
-			ExpiresAt: time.Now().AddDate(1, 0, 0), // Expires in 1 year
+			ExpiresAt: time.Now().AddDate(1, 0, 0),
 			CreatedAt: time.Now(),
 		},
 		{
@@ -62,7 +62,11 @@ func seedDB(db *gorm.DB) {
 
 	// Insert users
 	for i := range users {
-		users[i].SetPassword("password123")
+		if i == 4 {
+			users[i].SetPassword("admin")
+		} else {
+			users[i].SetPassword("password")
+		}
 		result := db.Create(&users[i])
 		if result.Error != nil {
 			log.Printf("Error creating user: %v", result.Error)
