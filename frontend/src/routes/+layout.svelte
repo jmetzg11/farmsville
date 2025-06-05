@@ -23,7 +23,9 @@
 					<li>
 						<a href="/messages" class="hover:text-teal-200 transition-colors">Messages</a>
 					</li>
-					<li><a href="/calendar" class="hover-text-teal-200 transition-colors">Calendar</a></li>
+					<li>
+						<a href="/calendar" class="hover:text-teal-200 transition-colors">Calendar</a>
+					</li>
 					<li>
 						<button
 							onclick={() => (showAuthModal = true)}
