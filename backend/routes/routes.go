@@ -59,7 +59,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/users/create", handler.CreateUser)
 
 			// messages
-			adminRoutes.POST("/messages", handler.SendTextMessage)
+			adminRoutes.POST("/send-email", handler.SendEmail)
 		}
 	}
 }

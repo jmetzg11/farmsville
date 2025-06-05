@@ -1,5 +1,5 @@
 <script>
-	import TextMessages from './components/TextMessages.svelte';
+	import SendEmail from './components/SendEmail.svelte';
 </script>
 
-<TextMessages />
+<SendEmail />
