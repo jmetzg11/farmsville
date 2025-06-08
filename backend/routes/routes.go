@@ -22,8 +22,10 @@ func SetupAPIRoutes(router *gin.Engine) {
 			c.JSON(200, gin.H{"message": "Hello from Go!"})
 		})
 		apiRouter.GET("/show_auth", handler.ShowAuth)
+
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
+
 		// auth
 		apiRouter.POST("/auth", handler.SendAuth)
 		apiRouter.POST("/auth/verify", handler.VerifyAuth)
@@ -33,6 +35,9 @@ func SetupAPIRoutes(router *gin.Engine) {
 		apiRouter.POST("/auth/code-to-reset-password", handler.SendCodeToResetPassword)
 		apiRouter.POST("/auth/reset-password", handler.ResetPassword)
 		apiRouter.GET("/auth/logout", handler.Logout)
+
+		// messages
+		apiRouter.GET("/messages", handler.GetMessages)
 
 		authRoutes := apiRouter.Group("/")
 		authRoutes.Use(handler.AuthMiddleware())
@@ -59,7 +64,9 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/users/create", handler.CreateUser)
 
 			// messages
-			adminRoutes.POST("/messages", handler.SendTextMessage)
+			adminRoutes.POST("/post-message", handler.PostMessage)
+			adminRoutes.DELETE("/messages/:id", handler.DeleteMessage)
+			adminRoutes.POST("/send-email", handler.SendEmail)
 		}
 	}
 }

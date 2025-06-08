@@ -1,12 +1,59 @@
-export async function sendTextMessage(numbers, message) {
+export async function postMessage(title, message) {
 	try {
-		const url = `${import.meta.env.VITE_API_URL}/messages`;
+		const url = `${import.meta.env.VITE_API_URL}/post-message`;
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ numbers, message }),
+			body: JSON.stringify({ title, message }),
+			credentials: 'include'
+		});
+		return true;
+	} catch (error) {
+		console.error('Error posting message', error);
+		return false;
+	}
+}
+
+export async function getMessages() {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/messages`;
+		const response = await fetch(url, {
+			method: 'GET'
+		});
+
+		return await response.json();
+	} catch (error) {
+		console.error('Error getting messages', error);
+		return [];
+	}
+}
+
+export async function deleteMessage(id) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/messages/${id}`;
+		const response = await fetch(url, {
+			method: 'DELETE',
+			credentials: 'include'
+		});
+		return await response.json();
+	} catch (error) {
+		console.error('Error deleting message', error);
+		return false;
+	}
+}
+
+export async function sendEmail(emails, title, message) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/send-email`;
+		console.log(url);
+		const response = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ emails, title, message }),
 			credentials: 'include'
 		});
 		return true;

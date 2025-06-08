@@ -1,19 +1,21 @@
 <script>
 	import { onMount } from 'svelte';
 	import { refreshUsers, users } from '$lib/stores/users.js';
-	import { sendTextMessage } from '$lib/api_calls/messages.js';
+	import { sendEmail } from '$lib/api_calls/messages.js';
 
-	const validUsers = $derived($users.filter((user) => user.phone.length >= 9));
+	const validUsers = $derived($users.filter((user) => user.email !== null));
 	let selectedUsers = $state([]);
 	let message = $state('');
+	let title = $state('');
 
 	onMount(async () => {
 		await refreshUsers();
 	});
 
-	async function sendMessage() {
-		const phoneNumbers = selectedUsers.map((user) => user.phone);
-		await sendTextMessage(phoneNumbers, message);
+	async function handleSendEmail() {
+		const emails = selectedUsers.map((user) => user.email);
+		await sendEmail(emails, title, message);
+		title = '';
 		message = '';
 		selectedUsers = [];
 	}
@@ -41,9 +43,13 @@
 </script>
 
 <div class="max-w-4xl mx-auto p-4">
-	<h2 class="text-2xl font-bold text-slate-700 mb-4">Text Messages</h2>
-	<div class="mb-4 bg-amber-300 p-3">
-		Can't do until we have a business account with real tax info.
+	<h2 class="text-2xl font-bold text-slate-700 mb-4">Send Email Message</h2>
+	<div class="mb-4">
+		<input
+			bind:value={title}
+			class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+			placeholder="Enter your title here..."
+		/>
 	</div>
 
 	<div class="mb-4">
@@ -66,7 +72,7 @@
 			>Clear All</button
 		>
 		<button
-			onclick={sendMessage}
+			onclick={handleSendEmail}
 			disabled={selectedUsers.length === 0 || !message.trim()}
 			class="bg-teal-500 text-white px-6 py-2 rounded-md font-bold hover:bg-teal-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 			>Send</button
@@ -85,7 +91,6 @@
 					onclick={() => toggleUser(user)}
 				>
 					<div class="font-medium truncate">{user.name ? user.name : user.email}</div>
-					<div class="text-sm text-slate-500 truncate">{user.phone}</div>
 				</button>
 			{/each}
 		</div>

@@ -21,7 +21,6 @@ export async function initializeUserStore() {
 		});
 		if (response.ok) {
 			const userData = await response.json();
-			console.log('User data:', userData);
 			authenticateUser(userData.user);
 			return true;
 		}
