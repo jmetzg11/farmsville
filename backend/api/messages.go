@@ -1,6 +1,7 @@
 package api
 
 import (
+	"farmsville/backend/models"
 	"fmt"
 	"net/http"
 	"net/smtp"
@@ -9,16 +10,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type SendEmailRequest struct {
-	Emails  []string `json:"emails" binding:"required"`
-	Title   string   `json:"title" binding:"required"`
-	Message string   `json:"message" binding:"required"`
+func (h *Handler) PostMessage(c *gin.Context) {
+	var request models.PostMessageRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	message := models.Message{
+		Title:   request.Title,
+		Message: request.Message,
+	}
+
+	if err := h.db.Create(&message).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Message posted",
+	})
 }
 
-// after adding user the fields don't clear, on the frontend
+func (h *Handler) GetMessages(c *gin.Context) {
+	var messages []models.Message
+	if err := h.db.Order("created_at DESC").Find(&messages).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"messages": messages})
+}
 
 func (h *Handler) SendEmail(c *gin.Context) {
-	var request SendEmailRequest
+	var request models.SendEmailRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

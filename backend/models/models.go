@@ -57,3 +57,10 @@ func (u *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
 }
+
+type Message struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Title     string    `gorm:"size:255;not null" json:"title" form:"title"`
+	Message   string    `gorm:"type:text" json:"message" form:"message"`
+	CreatedAt time.Time `json:"created_at"`
+}

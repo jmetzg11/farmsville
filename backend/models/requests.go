@@ -1,5 +1,6 @@
 package models
 
+// auth and users
 type Email struct {
 	Email string `json:"email" binding:"required"`
 }
@@ -27,6 +28,21 @@ type ResetPasswordRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type CreateUserRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+}
+
+type UpdateUserRequest struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+	Admin bool   `json:"admin"`
+}
+
+// items
 type ClaimRequest struct {
 	ItemID   int `json:"itemId"`
 	Quantity int `json:"quantity"`
@@ -42,22 +58,20 @@ type CreateItemRequest struct {
 	Quantity    int    `form:"quantity" binding:"required"`
 }
 
-type CreateUserRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
-}
-
-type UpdateUserRequest struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
-	Admin bool   `json:"admin"`
-}
-
 type AdminClaimItemRequest struct {
 	UserID int `json:"userId" binding:"required"`
 	ItemID int `json:"itemId" binding:"required"`
 	Amount int `json:"amount" binding:"required"`
+}
+
+// message
+type PostMessageRequest struct {
+	Title   string `json:"title" binding:"required"`
+	Message string `json:"message" binding:"required"`
+}
+
+type SendEmailRequest struct {
+	Emails  []string `json:"emails" binding:"required"`
+	Title   string   `json:"title" binding:"required"`
+	Message string   `json:"message" binding:"required"`
 }
