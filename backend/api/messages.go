@@ -43,6 +43,15 @@ func (h *Handler) GetMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"messages": messages})
 }
 
+func (h *Handler) DeleteMessage(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.db.Delete(&models.Message{}, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
 func (h *Handler) SendEmail(c *gin.Context) {
 	var request models.SendEmailRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

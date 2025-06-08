@@ -30,6 +30,20 @@ export async function getMessages() {
 	}
 }
 
+export async function deleteMessage(id) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/messages/${id}`;
+		const response = await fetch(url, {
+			method: 'DELETE',
+			credentials: 'include'
+		});
+		return await response.json();
+	} catch (error) {
+		console.error('Error deleting message', error);
+		return false;
+	}
+}
+
 export async function sendEmail(emails, title, message) {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/send-email`;
