@@ -67,6 +67,9 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/post-message", handler.PostMessage)
 			adminRoutes.DELETE("/messages/:id", handler.DeleteMessage)
 			adminRoutes.POST("/send-email", handler.SendEmail)
+
+			// blog
+			adminRoutes.POST("post-blog", handler.PostBlog)
 		}
 	}
 }

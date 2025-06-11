@@ -2,8 +2,37 @@
 	let title = $state('');
 	let content = $state([{ type: 'text', content: '', id: crypto.randomUUID() }]);
 
-	function handleSubmit() {
-		$inspect(content);
+	async function postBlog(formData) {
+		try {
+			const url = `${import.meta.env.VITE_API_URL}/post-blog`;
+			const response = await fetch(url, {
+				method: 'POST',
+				body: formData,
+				credentials: 'include'
+			});
+			return response.ok;
+		} catch (error) {
+			console.error('Error posting blog', error);
+			return false;
+		}
+	}
+
+	async function handleSubmit() {
+		const formData = new FormData();
+		formData.append('title', title);
+		formData.append('content', JSON.stringify(content));
+
+		content.forEach((block) => {
+			if (block.type === 'image') {
+				formData.append('image', block.file);
+			}
+		});
+
+		const success = await postBlog(title, content);
+		if (success) {
+			title = '';
+			content = [{ type: 'text', content: '', id: crypto.randomUUID() }];
+		}
 	}
 
 	function addBlock(type) {

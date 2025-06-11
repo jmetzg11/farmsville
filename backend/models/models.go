@@ -64,3 +64,21 @@ type Message struct {
 	Message   string    `gorm:"type:text" json:"message" form:"message"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type Blog struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Title     string    `gorm:"size:255;not null" json:"title"`
+	Blocks    []Block   `gorm:"foreignKey:BlogID;constraint:OnDelete:CASCADE" json:"blocks"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Block struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	BlogID    uint      `json:"blog_id"`
+	Type      string    `gorm:"size:50;not null" json:"type"`
+	Order     int       `json:"order"`
+	Text      string    `gorm:"type:text" json:"text,omitempty"`
+	Media     string    `gorm:"type:text" json:"media,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+}

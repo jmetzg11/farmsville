@@ -28,7 +28,14 @@ func Connect() error {
 		log.Fatal("Failed to connect to database", err)
 	}
 
-	DB.AutoMigrate(&models.Item{}, &models.ClaimedItem{}, &models.User{}, &models.Message{})
+	DB.AutoMigrate(
+		&models.Item{},
+		&models.ClaimedItem{},
+		&models.User{},
+		&models.Message{},
+		&models.Blog{},
+		&models.Block{},
+	)
 
 	seedDB(DB)
 	return nil
