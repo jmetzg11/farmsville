@@ -42,14 +42,14 @@
 					{#if item.photo_path}
 						<button
 							type="button"
-							class="h-28 w-full overflow-hidden mb-2 cursor-pointer"
+							class="h-28 w-full overflow-hidden mb-2 cursor-pointer rounded-lg"
 							onclick={() => openPhotoModal(item.photo_path)}
 							onkeydown={(e) => e.key === 'Enter' && openPhotoModal(item.photo_path)}
 						>
 							<img
 								src={`${import.meta.env.VITE_PHOTO_URL}/${item.photo_path}`}
 								alt={item.name}
-								class="w-full h-full object-cover"
+								class="w-full h-full object-contain"
 							/>
 						</button>
 					{/if}

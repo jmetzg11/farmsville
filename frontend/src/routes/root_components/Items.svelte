@@ -50,7 +50,7 @@
 							<img
 								src={`${import.meta.env.VITE_PHOTO_URL}/${item.photo_path}`}
 								alt={item.name}
-								class="w-full h-full object-cover"
+								class="w-full h-full object-contain"
 							/>
 						</button>
 					{/if}
