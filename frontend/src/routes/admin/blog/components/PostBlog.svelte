@@ -1,44 +1,34 @@
 <script>
+	import { postBlog } from '$lib/api_calls/blog';
 	let title = $state('');
-	let content = $state([{ type: 'text', content: '', id: crypto.randomUUID() }]);
-
-	async function postBlog(formData) {
-		try {
-			const url = `${import.meta.env.VITE_API_URL}/post-blog`;
-			const response = await fetch(url, {
-				method: 'POST',
-				body: formData,
-				credentials: 'include'
-			});
-			return response.ok;
-		} catch (error) {
-			console.error('Error posting blog', error);
-			return false;
-		}
-	}
+	let content = $state([{ type: 'text', media: '', id: crypto.randomUUID() }]);
 
 	async function handleSubmit() {
 		const formData = new FormData();
 		formData.append('title', title);
-		formData.append('content', JSON.stringify(content));
 
-		content.forEach((block) => {
-			if (block.type === 'image') {
-				formData.append('image', block.file);
+		content.forEach((block, index) => {
+			formData.append(`content[${index}][type]`, block.type);
+			if (block.type === 'image' && block.media instanceof File) {
+				formData.append(`content[${index}][file]`, block.media);
+			} else {
+				formData.append(`content[${index}][media]`, block.media || '');
 			}
 		});
 
-		const success = await postBlog(title, content);
+		const success = await postBlog(formData);
 		if (success) {
 			title = '';
-			content = [{ type: 'text', content: '', id: crypto.randomUUID() }];
+			content = [{ type: 'text', media: '', id: crypto.randomUUID() }];
+		} else {
+			throw new Error('Failed to post blog');
 		}
 	}
 
 	function addBlock(type) {
 		content.push({
 			type: type,
-			media: '',
+			media: type === 'text' ? '' : type === 'image' ? null : '',
 			id: crypto.randomUUID()
 		});
 	}
@@ -64,7 +54,7 @@
 
 		const block = content.find((b) => b.id === blockId);
 		if (block) {
-			block.file = file;
+			block.media = file;
 			block.preview = URL.createObjectURL(file);
 		}
 	}

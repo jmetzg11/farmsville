@@ -78,7 +78,6 @@ type Block struct {
 	BlogID    uint      `json:"blog_id"`
 	Type      string    `gorm:"size:50;not null" json:"type"`
 	Order     int       `json:"order"`
-	Text      string    `gorm:"type:text" json:"text,omitempty"`
 	Media     string    `gorm:"type:text" json:"media,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 }

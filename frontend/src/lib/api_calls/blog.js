@@ -1,4 +1,4 @@
-export async function postBlog(formData) {
+async function postBlog(formData) {
 	try {
 		const url = `${import.meta.env.VITE_API_URL}/post-blog`;
 		const response = await fetch(url, {
