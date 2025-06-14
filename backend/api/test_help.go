@@ -36,7 +36,14 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		sqlDB.Close()
 	})
 
-	err = db.AutoMigrate(&models.Item{}, &models.ClaimedItem{}, &models.User{}, &models.Message{})
+	err = db.AutoMigrate(
+		&models.Item{},
+		&models.ClaimedItem{},
+		&models.User{},
+		&models.Message{},
+		&models.Blog{},
+		&models.Block{},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,6 +78,7 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	adminGroup.POST("/items/create", handler.CreateItem)
 	adminGroup.POST("/items/admin-claim", handler.AdminClaimItem)
 	adminGroup.POST("/claimed-item/remove", handler.RemoveClaimedItem)
+	adminGroup.POST("/post-blog", handler.PostBlog)
 
 	// messages
 	router.GET("/messages", handler.GetMessages)
@@ -80,6 +88,9 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 
 	// customers
 	router.GET("/items", handler.GetItems)
+	router.GET("/blogs", handler.GetBlogs)
+
+	// customers auth
 	authGroup.POST("/claim", handler.MakeClaim)
 
 	// auth
