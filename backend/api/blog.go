@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
+	"gorm.io/gorm"
 )
 
 func (h *Handler) PostBlog(c *gin.Context) {
@@ -133,4 +134,30 @@ func handleBlogPhotoUpload(file *multipart.FileHeader) (string, error) {
 	}
 
 	return photoPath, nil
+}
+
+func (h *Handler) GetBlogs(c *gin.Context) {
+	var blogs []models.Blog
+	if err := h.db.Preload("Blocks", func(db *gorm.DB) *gorm.DB {
+		return db.Order("`order` ASC")
+	}).Find(&blogs).Error; err != nil {
+		fmt.Println("Error getting blogs", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get blogs"})
+		return
+	}
+
+	var content []gin.H
+	for _, blog := range blogs {
+		content = append(content, gin.H{
+			"id":     blog.ID,
+			"title":  blog.Title,
+			"blocks": blog.Blocks,
+		})
+	}
+
+	response := gin.H{
+		"blogs": content,
+	}
+
+	c.JSON(http.StatusOK, response)
 }

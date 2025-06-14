@@ -1,5 +1,6 @@
 <script>
 	import { postBlog } from '$lib/api_calls/blog';
+	import { extractYouTubeId } from '$lib/helpers';
 	let title = $state('');
 	let content = $state([{ type: 'text', media: '', id: crypto.randomUUID() }]);
 
@@ -57,12 +58,6 @@
 			block.media = file;
 			block.preview = URL.createObjectURL(file);
 		}
-	}
-
-	function extractYouTubeId(url) {
-		const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
-		const match = url.match(regex);
-		return match ? match[1] : null;
 	}
 </script>
 

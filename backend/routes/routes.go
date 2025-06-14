@@ -25,6 +25,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
+		apiRouter.GET("/blogs", handler.GetBlogs)
 
 		// auth
 		apiRouter.POST("/auth", handler.SendAuth)
