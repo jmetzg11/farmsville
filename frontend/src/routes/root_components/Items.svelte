@@ -71,7 +71,10 @@
 						</div>
 						<button
 							onclick={() => handleClick(item)}
-							class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
+							disabled={item.remaining_quantity <= 0}
+							class={item.remaining_quantity <= 0
+								? 'bg-gray-400 text-gray-700 font-medium py-1 px-4 rounded text-sm cursor-not-allowed'
+								: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer'}
 						>
 							{item.remaining_quantity <= 0 ? 'Out of Stock' : 'Claim'}
 						</button>
