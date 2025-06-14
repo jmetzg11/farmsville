@@ -24,7 +24,7 @@
 						<a href="/messages" class="hover:text-teal-200 transition-colors">Messages</a>
 					</li>
 					<li>
-						<a href="/calendar" class="hover:text-teal-200 transition-colors">Calendar</a>
+						<a href="/blog" class="hover:text-teal-200 transition-colors">Blog</a>
 					</li>
 					<li>
 						<button

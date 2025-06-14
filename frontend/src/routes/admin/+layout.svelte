@@ -33,6 +33,9 @@
 						<li>
 							<a href="/admin/messages" class="hover:text-slate-200 transition-colors">Messages</a>
 						</li>
+						<li>
+							<a href="/admin/blog" class="hover:text-slate-200 transition-colors">Blog</a>
+						</li>
 					</ul>
 				</nav>
 			</div>

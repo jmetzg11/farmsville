@@ -25,6 +25,7 @@ func SetupAPIRoutes(router *gin.Engine) {
 
 		// customers
 		apiRouter.GET("/items", handler.GetItems)
+		apiRouter.GET("/blogs", handler.GetBlogs)
 
 		// auth
 		apiRouter.POST("/auth", handler.SendAuth)
@@ -67,6 +68,9 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/post-message", handler.PostMessage)
 			adminRoutes.DELETE("/messages/:id", handler.DeleteMessage)
 			adminRoutes.POST("/send-email", handler.SendEmail)
+
+			// blog
+			adminRoutes.POST("post-blog", handler.PostBlog)
 		}
 	}
 }
