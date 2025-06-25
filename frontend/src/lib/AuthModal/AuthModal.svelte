@@ -26,10 +26,8 @@
 </script>
 
 {#if showAuthModal}
-	<div
-		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
-	>
-		<div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
+	<div class="modal-container">
+		<div class="modal-content-item">
 			{#if status === 'start'}
 				<Start onClose={closeModal} bind:status />
 			{:else if ['auth-code', 'enter-code'].includes(status)}

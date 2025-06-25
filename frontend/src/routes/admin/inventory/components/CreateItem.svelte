@@ -42,12 +42,10 @@
 		newItem.title.trim() !== '' && newItem.description.trim() !== '' && newItem.quantity > 0;
 </script>
 
-<div class="container mx-auto px-4 py-6">
+<div class="section-container">
 	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Create Item</h2>
 	<div class="gap-6 p-4">
-		<div
-			class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
-		>
+		<div class="item-card">
 			<div class="p-4">
 				<!-- Top row for title -->
 				<div class="mb-4">

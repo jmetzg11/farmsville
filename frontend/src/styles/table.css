@@ -1,0 +1,35 @@
+.table {
+	@apply min-w-full divide-y divide-gray-200;
+}
+
+.th {
+	@apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase;
+}
+
+.th-last {
+	@apply px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase;
+}
+
+.td {
+	@apply px-6 py-4 whitespace-nowrap;
+}
+
+.td-last {
+	@apply px-6 py-4 whitespace-nowrap text-right text-sm font-medium;
+}
+
+.td-span-admin {
+	@apply px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800;
+}
+
+.td-span-user {
+	@apply px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800;
+}
+
+.td-button-edit {
+	@apply text-blue-500 hover:text-blue-700 mr-3 cursor-pointer;
+}
+
+.td-button-delete {
+	@apply text-red-500 hover:text-red-700 cursor-pointer;
+}

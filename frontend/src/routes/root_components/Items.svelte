@@ -28,13 +28,11 @@
 	}
 </script>
 
-<div class="container mx-auto px-4 py-6">
+<div class="section-container">
 	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available</h2>
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+	<div class="grid-display">
 		{#each $items as item}
-			<div
-				class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
-			>
+			<div class="item-card">
 				<div class="p-4">
 					<div class="flex justify-between items-center mb-2">
 						<h3 class="text-lg font-bold text-gray-800">{item.name}</h3>
@@ -72,9 +70,7 @@
 						<button
 							onclick={() => handleClick(item)}
 							disabled={item.remaining_quantity <= 0}
-							class={item.remaining_quantity <= 0
-								? 'bg-gray-400 text-gray-700 font-medium py-1 px-4 rounded text-sm cursor-not-allowed'
-								: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer'}
+							class="btn"
 						>
 							{item.remaining_quantity <= 0 ? 'Out of Stock' : 'Claim'}
 						</button>

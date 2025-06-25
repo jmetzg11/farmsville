@@ -52,8 +52,8 @@
 </div>
 
 {#if showModal}
-	<div class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center">
-		<div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 shadow-xl">
+	<div class="modal-container">
+		<div class="modal-content-item">
 			<div class="mb-4">
 				<h3 class="text-xl font-bold text-gray-900 mb-2">Confirm Deletion</h3>
 				<div class="h-px bg-gray-200"></div>

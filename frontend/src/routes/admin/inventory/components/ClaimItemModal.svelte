@@ -27,12 +27,8 @@
 </script>
 
 {#if showClaimModal}
-	<div
-		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-6"
-	>
-		<div
-			class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow max-w-md w-full gap-8"
-		>
+	<div class="modal-container">
+		<div class="modal-content">
 			<div class="p-4">
 				<div class="flex justify-between items-center mb-4">
 					<h3 class="text-lg font-bold text-gray-800">{selectedItem.name}</h3>

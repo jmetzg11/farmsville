@@ -22,10 +22,8 @@
 </script>
 
 {#if showClaimModal}
-	<div
-		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
-	>
-		<div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+	<div class="modal-container">
+		<div class="modal-content">
 			<div class="flex justify-between items-center mb-4">
 				<h3 class="text-xl font-bold text-gray-800">{selectedItem.name}</h3>
 				<span class="text-md text-gray-500">{formatDate(selectedItem.created_at)}</span>
@@ -43,20 +41,8 @@
 				<span class="text-gray-700">{selectedItem.remaining_quantity}</span>
 			</div>
 			<div class="flex gap-2 justify-between mt-4">
-				<button
-					onclick={handleSubmit}
-					disabled={quantity <= 0}
-					class="py-2 px-4 rounded-md text-white
-            transition-colors duration-200
-            {quantity > 0 && quantity <= selectedItem.remaining_quantity
-						? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-						: 'bg-gray-400 cursor-not-allowed'}">Claim</button
-				>
-				<button
-					onclick={closeModal}
-					class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-					>Close</button
-				>
+				<button onclick={handleSubmit} disabled={quantity <= 0} class="btn">Claim</button>
+				<button onclick={closeModal} class="btn-close">Close</button>
 			</div>
 		</div>
 	</div>

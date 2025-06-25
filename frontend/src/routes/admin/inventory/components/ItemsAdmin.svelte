@@ -27,13 +27,11 @@
 	}
 </script>
 
-<div class="container mx-auto px-4 py-6">
+<div class="section-container">
 	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available</h2>
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
+	<div class="grid-display">
 		{#each $items as item}
-			<div
-				class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow"
-			>
+			<div class="item-card">
 				<div class="p-4">
 					<div class="flex justify-between items-center mb-2">
 						<h3 class="text-lg font-bold text-gray-800">{item.name}</h3>

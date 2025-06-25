@@ -13,10 +13,8 @@
 </script>
 
 {#if showDeleteModal}
-	<div
-		class="fixed inset-0 bg-[rgba(0,0,0,0.5)] z-50 flex items-center justify-center h-screen overflow-hidden p-4"
-	>
-		<div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+	<div class="modal-container">
+		<div class="modal-content">
 			<h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
 				Are you sure you want to delete
 				{selectedUser.name ? selectedUser.name : selectedUser.email}?
