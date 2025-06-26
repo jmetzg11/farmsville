@@ -1,0 +1,3 @@
+.item-card {
+	@apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow;
+}

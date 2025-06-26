@@ -1,3 +1,4 @@
+/* grouping */
 .section-container {
 	@apply container mx-auto px-4 py-6;
 }
@@ -6,10 +7,16 @@
 	@apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
 }
 
-.item-card {
-	@apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow;
+/* text */
+.text-title {
+	@apply text-2xl font-bold text-gray-900 text-center;
 }
 
+.text-info {
+	@apply text-gray-600 text-center;
+}
+
+/* buttons */
 .btn {
 	@apply bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white py-1 px-4 rounded transition-colors cursor-pointer;
 }
@@ -20,4 +27,9 @@
 
 .btn-close {
 	@apply px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer;
+}
+
+/* forms */
+.input {
+	@apply w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
