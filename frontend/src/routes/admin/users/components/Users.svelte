@@ -45,9 +45,9 @@
 			<th class="th-last">Actions</th>
 		</tr>
 	</thead>
-	<tbody class="bg-white divide-y divide-gray-200">
+	<tbody class="tbody">
 		{#each $users as user}
-			<tr class="hover:bg-gray-50">
+			<tr class="tr-body">
 				<td class="td">{user.name}</td>
 				<td class="td">{user.email}</td>
 				<td class="td">{user.phone}</td>

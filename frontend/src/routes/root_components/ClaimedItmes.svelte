@@ -10,17 +10,15 @@
 		{#each $claimedItems as item}
 			<div class="item-card">
 				<div class="p-4">
-					<div class="flex justify-between items-center">
-						<span class="font-medium text-gray-800">{item.item_name}</span>
-						<span class="font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-							Qty: {item.quantity}
-						</span>
+					<div class="item-row">
+						<span class="card-title">{item.item_name}</span>
+						<span class="card-qty-display">Qty: {item.quantity}</span>
 					</div>
-					<div class="flex justify-between items-center text-sm text-gray-600 mt-4">
-						<span class="font-medium"
+					<div class="item-row mt-6">
+						<span class="card-text"
 							>{item.user_name ? item.user_name : item.user_email.split('@')[0]}</span
 						>
-						<span class="text-gray-500">{formatDate(item.created_at)}</span>
+						<span class="card-text">{formatDate(item.created_at)}</span>
 					</div>
 				</div>
 			</div>

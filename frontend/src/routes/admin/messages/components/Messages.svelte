@@ -5,8 +5,8 @@
 	let activeTab = $state('post');
 </script>
 
-<div class="max-w-4xl mx-auto p-4">
-	<div class="flex justify-between items-center mb-4">
+<div class="section-container">
+	<div class="flex-between-center mb-4">
 		<button
 			class="text-2xl font-bold cursor-pointer {activeTab === 'post'
 				? 'text-teal-600 border-b-2 border-teal-600'

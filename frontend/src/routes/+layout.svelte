@@ -9,33 +9,30 @@
 	let showAuthModal = $state(false);
 </script>
 
-<div class="min-h-screen flex flex-col">
-	<header class="bg-teal-500 text-white shadow-md">
-		<div class="container mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center">
+<div class="header-container">
+	<header class="header">
+		<div class="header-wrapper">
 			<div class="text-xl font-bold">
 				Welcome, {$user.name ? $user.name : $user.email ? $user.email.split('@')[0] : 'Guest'}
 			</div>
 			<nav>
-				<ul class="flex space-x-6">
+				<ul class="header-ul">
 					<li>
-						<a href="/" class="hover:text-teal-200 transition-colors">Inventory</a>
+						<a href="/" class="header-li">Inventory</a>
 					</li>
 					<li>
-						<a href="/messages" class="hover:text-teal-200 transition-colors">Messages</a>
+						<a href="/messages" class="header-li">Messages</a>
 					</li>
 					<li>
-						<a href="/blog" class="hover:text-teal-200 transition-colors">Blog</a>
+						<a href="/blog" class="header-li">Blog</a>
 					</li>
 					<li>
-						<button
-							onclick={() => (showAuthModal = true)}
-							class="hover:text-teal-200 transition-colors cursor-pointer"
-						>
+						<button onclick={() => (showAuthModal = true)} class="header-li">
 							{$user.isAuthenticated ? 'Logout' : 'Login'}
 						</button>
 					</li>
 					{#if $user.admin}
-						<li><a href="/admin" class="hover:text-teal-200 transition-colors">Admin</a></li>
+						<li><a href="/admin" class="header-li">Admin</a></li>
 					{/if}
 				</ul>
 			</nav>

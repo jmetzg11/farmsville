@@ -23,7 +23,7 @@
 
 <div class="max-w-4xl mx-auto p-6">
 	{#each blogs as blog}
-		<article class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
+		<article class="blog-display-container">
 			<Blog {blog} />
 		</article>
 	{/each}
