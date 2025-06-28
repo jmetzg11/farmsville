@@ -19,12 +19,10 @@
 					<div class="item-row">
 						<span class="card-title">{item.item_name}</span>
 						<div class="flex items-center gap-2">
-							<span class="font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-								Qty: {item.quantity}
-							</span>
+							<span class="card-qty-display">Qty: {item.quantity}</span>
 							<button
 								on:click={() => handleRemove(item.id)}
-								class=" bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors cursor-pointer"
+								class="card-x-red-circle"
 								aria-label="Remove item"
 							>
 								<svg

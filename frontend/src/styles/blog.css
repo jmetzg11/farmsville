@@ -1,4 +1,31 @@
+/* blog display */
+
+.blog-display-container {
+	@apply bg-white rounded-lg shadow-md mb-8 overflow-hidden;
+}
+
+.blog-display-title {
+	@apply text-4xl font-semibold mb-6 text-gray-900;
+}
+
+.blog-display-text {
+	@apply text-gray-700 leading-relaxed whitespace-pre-wrap;
+}
+
+.blog-display-image {
+	@apply max-w-full max-h-64 object-cover h-auto rounded-lg shadow-sm;
+}
+
+.blog-display-youtube-container {
+	@apply w-full max-w-2xl aspect-video;
+}
+
+.blog-display-youtube-iframe {
+	@apply w-full h-full rounded-lg;
+}
+
 /* create blog */
+
 .blog-title-input {
 	@apply w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500;
 }

@@ -57,7 +57,7 @@
 								bind:value={amount}
 								min="1"
 								max={selectedItem.remaining_quantity}
-								class="input"
+								class="input border-gray-300"
 								placeholder="Amount"
 							/>
 						</div>
