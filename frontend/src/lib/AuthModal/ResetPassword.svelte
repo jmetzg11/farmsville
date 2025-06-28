@@ -49,29 +49,13 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4 mb-6 pb-2">
+<div class="flex-vertical">
 	{#if status === 'reset-password'}
-		<h2 class="text-lg font-bold text-gray-900 text-center">Restset Your Password</h2>
-		<p class="text-gray-600 text-center">A authentication code will be sent to your email</p>
-		<input
-			type="email"
-			bind:value={email}
-			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-			placeholder="your@email.com"
-		/>
-		<button
-			onclick={handleSendCode}
-			disabled={!isEmailValid}
-			class="py-2 px-4 rounded-md text-white transition-colors duration-200 {isEmailValid
-				? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-				: 'bg-gray-400 cursor-not-allowed'}">Send Code</button
-		>
-		<button
-			onclick={onClose}
-			class="py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-		>
-			Cancel
-		</button>
+		<h2 class="text-title">Restset Your Password</h2>
+		<p class="text-subtitle">A authentication code will be sent to your email</p>
+		<input type="email" bind:value={email} class="input" placeholder="your@email.com" />
+		<button onclick={handleSendCode} disabled={!isEmailValid} class="btn">Send Code</button>
+		<button onclick={onClose} class="btn-close"> Cancel </button>
 	{:else if status === 'enter-code-and-password'}
 		<input
 			type="text"
@@ -81,37 +65,15 @@
 			inputmode="numeric"
 			pattern="[0-9]*"
 			maxlength="6"
-			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+			class="input"
 			placeholder="Enter 6-digit code"
 		/>
-		<input
-			type="text"
-			bind:value={password}
-			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-			placeholder="password"
-		/>
-		<input
-			type="text"
-			bind:value={confirmPassword}
-			class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-			placeholder="confirm password"
-		/>
+		<input type="text" bind:value={password} class="input" placeholder="password" />
+		<input type="text" bind:value={confirmPassword} class="input" placeholder="confirm password" />
 
-		<button
-			onclick={handleResetPassword}
-			disabled={!codeIsValid || !passwordIsValid}
-			class="py-2 px-4 rounded-md text-white transition-colors duration-200 {codeIsValid &&
-			passwordIsValid
-				? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-				: 'bg-gray-400 cursor-not-allowed'}"
-		>
+		<button onclick={handleResetPassword} disabled={!codeIsValid || !passwordIsValid} class="btn">
 			Reset Password
 		</button>
-		<button
-			onclick={onClose}
-			class="py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
-		>
-			Cancel
-		</button>
+		<button onclick={onClose} class="btn-close"> Cancel </button>
 	{/if}
 </div>

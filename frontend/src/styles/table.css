@@ -10,6 +10,14 @@
 	@apply px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase;
 }
 
+.tbody {
+	@apply bg-white divide-y divide-gray-200;
+}
+
+.tr-body {
+	@apply hover:bg-gray-50;
+}
+
 .td {
 	@apply px-6 py-4 whitespace-nowrap;
 }

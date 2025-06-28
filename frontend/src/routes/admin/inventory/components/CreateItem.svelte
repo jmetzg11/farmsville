@@ -43,18 +43,13 @@
 </script>
 
 <div class="section-container">
-	<h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Create Item</h2>
+	<h2 class="text-title-section">Create Item</h2>
 	<div class="gap-6 p-4">
 		<div class="item-card">
 			<div class="p-4">
 				<!-- Top row for title -->
 				<div class="mb-4">
-					<input
-						type="text"
-						placeholder="Title"
-						bind:value={newItem.title}
-						class="text-lg font-bold text-gray-800 border border-gray-300 rounded px-2 py-1 w-full"
-					/>
+					<input type="text" placeholder="Title" bind:value={newItem.title} class="input" />
 				</div>
 
 				<!-- Middle section for description -->
@@ -62,20 +57,20 @@
 					<textarea
 						placeholder="Description"
 						bind:value={newItem.description}
-						class="text-gray-600 text-sm border border-gray-300 rounded px-2 py-1 w-full"
+						class="input"
 						rows="3"
 					></textarea>
 				</div>
 
 				<!-- Bottom row for quantity, photo, and create button -->
-				<div class="flex items-center justify-between">
+				<div class="flex-between-center">
 					<div class="flex items-center">
-						<label for="quantity" class="text-sm text-gray-700 mr-2">Quantity:</label>
+						<label for="quantity" class="label">Quantity:</label>
 						<input
 							id="quantity"
 							type="number"
 							bind:value={newItem.quantity}
-							class="font-medium w-16 border border-gray-300 rounded px-2 py-1"
+							class="input-small"
 							min="0"
 						/>
 					</div>
@@ -87,20 +82,11 @@
 							onchange={handlePhotoChange}
 							class="hidden"
 						/>
-						<button
-							onclick={triggerFileInput}
-							class="bg-slate-700 hover:bg-slate-800 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer"
+						<button onclick={triggerFileInput} class="btn-tertiary"
 							>{newItem.photo ? 'Photo Selected' : 'Upload Photo'}</button
 						>
 					</div>
-					<button
-						onclick={handleCreate}
-						disabled={!isFormValid}
-						class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded text-sm transition-colors cursor-pointer
-						disabled:bg-blue-300 disabled:cursor-not-allowed"
-					>
-						Create
-					</button>
+					<button onclick={handleCreate} disabled={!isFormValid} class="btn"> Create </button>
 				</div>
 			</div>
 		</div>

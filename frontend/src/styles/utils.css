@@ -7,29 +7,87 @@
 	@apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
 }
 
+.gird-tight-display {
+	@apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2;
+}
+
+.two-col {
+	@apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
 /* text */
 .text-title {
 	@apply text-2xl font-bold text-gray-900 text-center;
 }
 
-.text-info {
+.text-title-section {
+	@apply text-2xl font-bold text-gray-800 mb-6 border-b pb-2;
+}
+
+.text-title-small {
+	@apply text-lg font-bold text-gray-800 text-center;
+}
+
+.text-subtitle {
 	@apply text-gray-600 text-center;
+}
+
+.text-error {
+	@apply text-red-600;
 }
 
 /* buttons */
 .btn {
-	@apply bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white py-1 px-4 rounded transition-colors cursor-pointer;
+	@apply px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded transition-colors cursor-pointer;
 }
 
 .btn-secondary {
-	@apply bg-teal-500 hover:bg-teal-600 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white py-1 px-4 rounded transition-colors cursor-pointer;
+	@apply px-4 py-2 bg-teal-500 hover:bg-teal-600 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded transition-colors cursor-pointer;
+}
+
+.btn-tertiary {
+	@apply px-4 py-2 bg-slate-700 hover:bg-slate-800 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded transition-colors cursor-pointer;
 }
 
 .btn-close {
 	@apply px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer;
 }
 
+.btn-danger {
+	@apply px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded transition-colors cursor-pointer;
+}
+
+.clickable-card {
+	@apply bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer;
+}
+
 /* forms */
+.label {
+	@apply text-sm text-gray-700 mr-2;
+}
+
 .input {
 	@apply w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none;
+}
+
+.input-three-quarter {
+	@apply w-3/4 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none;
+}
+
+.input-small {
+	@apply w-16 border border-gray-300 rounded px-2 py-1;
+}
+
+/* flex */
+
+.flex-vertical {
+	@apply flex flex-col gap-4;
+}
+
+.flex-buttons {
+	@apply flex justify-between;
+}
+
+.flex-between-center {
+	@apply flex justify-between items-center;
 }

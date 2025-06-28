@@ -47,8 +47,8 @@
 	}
 </script>
 
-{#if status === 'enter-code'}
-	<div class="flex flex-col gap-4 mb-6 pb-2">
+{#if status === 'auth-code'}
+	<div class="flex-vertical">
 		<h2 class="text-title">Send Code to Email</h2>
 		<p class="text-info">
 			Enter your email address and we'll send you a 6 digit code from a gmail account.
@@ -56,13 +56,13 @@
 		<input type="email" bind:value={email} class="input" placeholder="your@email.com" />
 	</div>
 
-	<div class="flex justify-between">
+	<div class="flex-buttons mt-6">
 		<button onclick={handleSendCode} disabled={!isEmailValid} class="btn"> Send Code </button>
 		<button onclick={onClose} class="btn-close"> Cancel </button>
 	</div>
-{:else if status === 'auth-code'}
-	<div class="flex flex-col gap-3 justify-between w-full">
-		<p class="text-info">You have 15 minutes to enter this code to authenticate.</p>
+{:else if status === 'enter-code'}
+	<div class="flex-vertical">
+		<p class="text-subtitle">You have 15 minutes to enter this code to authenticate.</p>
 
 		<input
 			type="text"

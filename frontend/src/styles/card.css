@@ -1,3 +1,39 @@
 .item-card {
 	@apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow;
 }
+
+.item-card-warapper {
+	@apply flex justify-between items-center p-4;
+}
+
+.item-row {
+	@apply flex justify-between items-center;
+}
+
+.card-title {
+	@apply font-medium text-gray-800;
+}
+
+.card-text {
+	@apply text-gray-600 text-center text-sm;
+}
+
+.card-text-no-center {
+	@apply text-gray-600 text-sm;
+}
+
+.card-image-wrapper {
+	@apply h-28 w-full overflow-hidden mb-2 cursor-pointer rounded-lg;
+}
+
+.card-image {
+	@apply w-full h-full object-contain;
+}
+
+.card-quantity-bar-wrapper {
+	@apply w-full bg-gray-200 rounded-full h-2.5;
+}
+
+.card-quantity-bar {
+	@apply bg-green-600 h-2.5 rounded-full;
+}
