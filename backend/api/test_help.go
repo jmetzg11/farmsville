@@ -89,6 +89,8 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	// admin blog
 	adminGroup.POST("/post-blog", handler.PostBlog)
 	adminGroup.GET("/get-blog-titles", handler.GetBlogTitles)
+	adminGroup.GET("/get-blog/:id", handler.GetBlogById)
+	adminGroup.POST("/edit-blog", handler.EditBlog)
 
 	// customers
 	router.GET("/items", handler.GetItems)

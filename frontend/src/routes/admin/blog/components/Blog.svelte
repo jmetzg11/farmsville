@@ -1,6 +1,6 @@
 <script>
 	import PostBlog from './PostBlog.svelte';
-	import EditBlog from './EditBlog.svelte';
+	import EditBlogs from './EditBlogs.svelte';
 
 	let activeTab = $state('post');
 </script>
@@ -24,6 +24,6 @@
 	{#if activeTab === 'post'}
 		<PostBlog />
 	{:else}
-		<EditBlog />
+		<EditBlogs />
 	{/if}
 </div>

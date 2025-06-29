@@ -28,3 +28,28 @@ export async function postBlog(formData) {
 		return false;
 	}
 }
+
+export async function getBlogById(id) {
+	const url = `${import.meta.env.VITE_API_URL}/get-blog/${id}`;
+	const response = await fetch(url, {
+		credentials: 'include'
+	});
+	const data = await response.json();
+	return data.blog;
+}
+
+export async function editBlog(formData) {
+	try {
+		const url = `${import.meta.env.VITE_API_URL}/edit-blog`;
+		const response = await fetch(url, {
+			method: 'POST',
+			body: formData,
+			credentials: 'include'
+		});
+		return response.ok;
+	} catch (error) {
+		console.log(error);
+		console.error('Error posting blog', error);
+		return false;
+	}
+}

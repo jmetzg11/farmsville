@@ -81,7 +81,7 @@
 					>
 					<button
 						onclick={() => moveBlock(index, 'down')}
-						class="blog-reorder-section-button"
+						class="blog-reorder-button"
 						disabled={index === content.length - 1}>↓</button
 					>
 					<button onclick={() => removeBlock(block.id)} class="blog-remove-section-button">×</button
