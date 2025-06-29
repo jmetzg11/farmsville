@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ClaimedItemWithUserName struct {
 	ClaimedItem
 	ItemName  string `json:"item_name"`
@@ -13,4 +15,10 @@ type UserResponse struct {
 	Name  string `json:"name"`
 	Phone string `json:"phone"`
 	Admin bool   `json:"admin"`
+}
+
+type BlogTitles struct {
+	ID        uint      `json:"id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
 }

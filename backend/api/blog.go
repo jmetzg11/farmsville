@@ -141,7 +141,6 @@ func (h *Handler) GetBlogs(c *gin.Context) {
 	if err := h.db.Preload("Blocks", func(db *gorm.DB) *gorm.DB {
 		return db.Order("`order` ASC")
 	}).Find(&blogs).Error; err != nil {
-		fmt.Println("Error getting blogs", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get blogs"})
 		return
 	}
@@ -160,4 +159,18 @@ func (h *Handler) GetBlogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *Handler) GetBlogTitles(c *gin.Context) {
+	var blogs []models.BlogTitles
+
+	if err := h.db.Model(&models.Blog{}).
+		Select("id, title, created_at").
+		Order("created_at desc").
+		Find(&blogs).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to fetch blog titles"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"titles": blogs})
 }

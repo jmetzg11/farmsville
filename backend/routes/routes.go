@@ -70,7 +70,8 @@ func SetupAPIRoutes(router *gin.Engine) {
 			adminRoutes.POST("/send-email", handler.SendEmail)
 
 			// blog
-			adminRoutes.POST("post-blog", handler.PostBlog)
+			adminRoutes.POST("/post-blog", handler.PostBlog)
+			adminRoutes.GET("/get-blog-titles", handler.GetBlogTitles)
 		}
 	}
 }

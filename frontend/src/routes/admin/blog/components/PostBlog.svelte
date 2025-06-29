@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte';
 	import { postBlog } from '$lib/api_calls/blog';
 	import { extractYouTubeId } from '$lib/helpers';
 	let title = $state('');

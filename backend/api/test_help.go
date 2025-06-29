@@ -68,26 +68,31 @@ func setUpTestRouter(handler *Handler) *gin.Engine {
 	authGroup.Use(handler.AuthMiddleware())
 	adminGroup.Use(handler.AdminMiddleware())
 
-	// admin
+	// admin users
 	adminGroup.GET("/users", handler.GetUsers)
 	adminGroup.POST("/users/update", handler.UpdateUser)
 	adminGroup.POST("/users/remove", handler.RemoveUser)
 	adminGroup.POST("/users/create", handler.CreateUser)
+
+	// admin items
 	adminGroup.POST("/items/update", handler.UpdateItem)
 	adminGroup.POST("/items/remove", handler.RemoveItem)
 	adminGroup.POST("/items/create", handler.CreateItem)
 	adminGroup.POST("/items/admin-claim", handler.AdminClaimItem)
 	adminGroup.POST("/claimed-item/remove", handler.RemoveClaimedItem)
-	adminGroup.POST("/post-blog", handler.PostBlog)
 
-	// messages
-	router.GET("/messages", handler.GetMessages)
+	// admin messages
 	adminGroup.POST("/post-message", handler.PostMessage)
 	adminGroup.DELETE("/messages/:id", handler.DeleteMessage)
 	adminGroup.POST("/send-email", handler.SendEmail)
 
+	// admin blog
+	adminGroup.POST("/post-blog", handler.PostBlog)
+	adminGroup.GET("/get-blog-titles", handler.GetBlogTitles)
+
 	// customers
 	router.GET("/items", handler.GetItems)
+	router.GET("/messages", handler.GetMessages)
 	router.GET("/blogs", handler.GetBlogs)
 
 	// customers auth

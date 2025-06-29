@@ -1,6 +1,6 @@
 <script>
-	import PostMessage from './PostMessage.svelte';
-	import DeleteMessage from './DeleteMessage.svelte';
+	import PostBlog from './PostBlog.svelte';
+	import EditBlog from './EditBlog.svelte';
 
 	let activeTab = $state('post');
 </script>
@@ -11,19 +11,19 @@
 			class="tab-button {activeTab === 'post' ? 'tab-button-active' : 'tab-button-inactive'}"
 			onclick={() => (activeTab = 'post')}
 		>
-			Post Message
+			Post Blog
 		</button>
 		<button
-			class="tab-button {activeTab === 'delete' ? 'tab-button-active' : 'tab-button-inactive'}"
-			onclick={() => (activeTab = 'delete')}
+			class="tab-button {activeTab === 'edit' ? 'tab-button-active' : 'tab-button-inactive'}"
+			onclick={() => (activeTab = 'edit')}
 		>
-			Delete Message
+			Edit Blog
 		</button>
 	</div>
 
 	{#if activeTab === 'post'}
-		<PostMessage />
+		<PostBlog />
 	{:else}
-		<DeleteMessage />
+		<EditBlog />
 	{/if}
 </div>

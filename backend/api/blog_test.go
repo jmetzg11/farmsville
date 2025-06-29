@@ -33,7 +33,6 @@ func TestPostBlog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create test token: %v", err)
 	}
-	t.Logf("Generated token: %s", token)
 
 	var buf bytes.Buffer
 	writer := multipart.NewWriter(&buf)
@@ -114,4 +113,50 @@ func TestGetBlogs(t *testing.T) {
 
 	blocks := firstBlog["blocks"].([]interface{})
 	assert.Len(t, blocks, 2)
+}
+
+func TestGetBlogTitles(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	db := setupTestDB(t)
+	handler := NewHandler(db)
+	router := setUpTestRouter(handler)
+
+	testUser := models.User{
+		Name:  "Test Admin",
+		Email: "admin@example.com",
+		Admin: true,
+	}
+	if err := db.Create(&testUser).Error; err != nil {
+		t.Fatalf("Failed to create test user: %v", err)
+	}
+
+	blog := models.Blog{
+		Title: "Test Blog",
+	}
+	db.Create(&blog)
+
+	tokenString, err := getTestUserToken(testUser)
+	if err != nil {
+		t.Fatalf("Failed to create test token: %v", err)
+	}
+
+	req, _ := http.NewRequest("GET", "/get-blog-titles", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "auth_token",
+		Value: tokenString,
+	})
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &response)
+
+	titles := response["titles"].([]interface{})
+	assert.Len(t, titles, 1)
+
+	firstTitle := titles[0].(map[string]interface{})
+	assert.Equal(t, "Test Blog", firstTitle["title"])
 }
