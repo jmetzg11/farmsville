@@ -1,3 +1,7 @@
+.blogs-container {
+	@apply max-w-4xl mx-auto p-6;
+}
+
 /* blog display */
 
 .blog-display-container {
@@ -42,7 +46,7 @@
 	@apply text-sm font-medium text-gray-600;
 }
 
-.blog-reorder-section-button {
+.blog-reorder-button {
 	@apply text-gray-500 hover:text-gray-700 disabled:opacity-30 text-lg cursor-pointer;
 }
 

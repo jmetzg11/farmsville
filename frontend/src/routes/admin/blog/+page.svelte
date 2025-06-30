@@ -1,5 +1,5 @@
 <script>
-	import PostBlog from './components/PostBlog.svelte';
+	import Blog from './components/Blog.svelte';
 </script>
 
-<div class="section-container"><PostBlog /></div>
+<Blog />

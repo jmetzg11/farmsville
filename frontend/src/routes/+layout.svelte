@@ -27,7 +27,7 @@
 						<a href="/blog" class="header-li">Blog</a>
 					</li>
 					<li>
-						<button onclick={() => (showAuthModal = true)} class="header-li">
+						<button onclick={() => (showAuthModal = true)} class="header-li cursor-pointer">
 							{$user.isAuthenticated ? 'Logout' : 'Login'}
 						</button>
 					</li>

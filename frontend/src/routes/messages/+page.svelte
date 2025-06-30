@@ -10,7 +10,7 @@
 	});
 </script>
 
-<div class="max-w-4xl mx-auto p-6">
+<div class="section-container">
 	<h1 class="text-title mb-8">Messages</h1>
 
 	<div class="space-y-6">
