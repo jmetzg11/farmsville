@@ -8,3 +8,5 @@ main
 fly.toml
 
 .env
+
+.venv
