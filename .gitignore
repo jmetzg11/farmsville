@@ -1,4 +1,8 @@
-data
+data/*
+!data/docker-compose.yml
+!data/photos/
+data/photos/*
+!data/photos/dev_photos/
 
 tmp
 
