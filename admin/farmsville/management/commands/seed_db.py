@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 qty=10,
                 remaining=10,
                 notes=notes,
-                photo_url=f'/data/photos/dev_photos/{photo}'
+                photo_url=f'/dev_photos/{photo}'
             )
             products.append(product)
 

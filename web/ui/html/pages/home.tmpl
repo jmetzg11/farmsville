@@ -1,0 +1,43 @@
+{{define "main"}}
+<h1>Farmsville</h1>
+
+<h2>Products</h2>
+{{if .Products}}
+<div class="products-list">
+    {{range .Products}}
+    <div class="product">
+        <h3>{{.ProductName}}</h3>
+        <p>Quantity: {{.Qty}}</p>
+        <p>Remaining: {{.Remaining}}</p>
+        {{if .Notes}}
+        <p>Notes: {{.Notes}}</p>
+        {{end}}
+        {{if .PhotoURL}}
+        <img src="{{.PhotoURL}}" alt="{{.ProductName}}">
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{else}}
+<p>No products available.</p>
+{{end}}
+
+<h2>Claims</h2>
+{{if .Claims}}
+<div class="claims-list">
+    {{range .Claims}}
+    <div class="claim">
+        <h3>{{.ProductName}}</h3>
+        <p>User: {{.User}}</p>
+        <p>Quantity: {{.Qty}}</p>
+        <p>Date: {{.DateTime.Format "2006-01-02 15:04"}}</p>
+        {{if .Notes}}
+        <p>Notes: {{.Notes}}</p>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{else}}
+<p>No claims yet.</p>
+{{end}}
+{{end}}
