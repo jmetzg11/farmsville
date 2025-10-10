@@ -5,7 +5,7 @@ tmp_dir = "tmp"
   cmd = "go build -o tmp/main ."
   clean_cmd = "rm -rf tmp/main"
   include_ext = ["go", "html", "tmpl", "css"]
-  exclude_dir = ["vendor", "tmp"]
+  exclude_dir = ["vendor", "tmp", "node_modules"]
   delay = 1000
   full_bin = "./tmp/main 2>&1 | tee /dev/stderr"
 [log]
