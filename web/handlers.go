@@ -23,5 +23,5 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		Claims:   claims,
 	}
 
-	app.render(w, http.StatusOK, "home.tmpl", data)
+	app.render(w, http.StatusOK, "home.html", data)
 }

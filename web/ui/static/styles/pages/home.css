@@ -1,0 +1,47 @@
+.section-container {
+    @apply container mx-auto px-4 py-6;
+}
+
+.grid-display {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+.item-card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow p-4;
+}
+
+.card-title {
+    @apply font-medium text-gray-800 pb-4;
+}
+
+.card-image-wrapper {
+    @apply h-28 w-full overflow-hidden mb-2 rounded-lg;
+}
+
+.card-image {
+    @apply w-full h-full object-contain;
+}
+
+.item-bottom-container {
+    @apply flex justify-between items-center mt-4;
+}
+
+.card-quantity-bar-wrapper {
+    @apply w-full bg-gray-200 rounded-full h-2.5;
+}
+
+.card-quantity-bar {
+    @apply bg-green-600 h-2.5 rounded-full;
+}
+
+.btn {
+    @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed text-white rounded transition-colors cursor-pointer;
+}
+
+.card-qty-display {
+    @apply bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm;
+}
+
+.item-row {
+    @apply flex justify-between items-center;
+}

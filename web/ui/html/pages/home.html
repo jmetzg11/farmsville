@@ -1,0 +1,55 @@
+{{define "main"}}
+
+{{if .Products}}
+<div class="section-container">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Available</h2>
+    <div class="grid-display">
+        {{range .Products}}
+        <div class="item-card">
+            <h3 class="card-title">{{.ProductName}}</h3>
+            {{if .PhotoURL}}
+            <div class="card-image-wrapper">
+                <img src="{{.PhotoURL}}" alt="{{.ProductName}}" class="card-image" />
+            </div>
+            {{end}}
+            <p class="text-grapy-600">{{.Notes}}</p>
+            <div class="item-bottom-container">
+                <div class="space-y-2">
+                    <div class="card-quantity-bar-wrapper">
+                        <div class="card-quantity-bar" style="width: {{percentage .Remaining .Qty}}%"></div>
+                    </div>
+                    <span class="text-gray-600">{{.Remaining}} / {{.Qty}}</span>
+                </div>
+                <button class="btn" {{if le .Remaining
+                    0}}disabled{{else}}onclick="document.getElementById('claim-modal').style.display='flex'" {{end}}>
+                    {{if le .Remaining 0}}Out of Stock{{else}}Claim{{end}}
+                </button>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+<div class="section-container">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Items Claimed</h2>
+    <div class="grid-display">
+        {{range .Claims}}
+        <div class="item-card">
+            <div class="item-row">
+                <span class="card-title">{{.ProductName}}</span>
+                <span class="card-qty-display">Qty: {{.Qty}}</span>
+            </div>
+            <div class="item-row mt-6">
+                <span class="text-gray-600">{{.User}}</span>
+                <span class="text-gray-600">{{.DateTime.Format "2006-01-02 15:04"}}</span>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+{{else}}
+<p>No products available.</p>
+{{end}}
+
+{{template "claimModal" .}}{{end}}

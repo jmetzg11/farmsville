@@ -2,9 +2,9 @@ root = "."
 tmp_dir = "tmp"
 [build]
   bin = "tmp/main"
-  cmd = "go build -o tmp/main ."
+  cmd = "npx tailwindcss -i ./ui/static/input.css -o ./ui/static/main.css --minify && go build -o tmp/main ."
   clean_cmd = "rm -rf tmp/main"
-  include_ext = ["go", "html", "tmpl", "css"]
+  include_ext = ["go", "html", "css"]
   exclude_dir = ["vendor", "tmp", "node_modules"]
   delay = 1000
   full_bin = "./tmp/main 2>&1 | tee /dev/stderr"

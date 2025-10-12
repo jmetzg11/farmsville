@@ -20,7 +20,7 @@ type ProductClaimed struct {
 	ID          int
 	DateTime    time.Time
 	User        string
-	ProductName string
+	ProductName string `json:"product_name"`
 	Qty         int
 	Notes       string
 }

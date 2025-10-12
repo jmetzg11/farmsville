@@ -16,7 +16,7 @@ import (
 )
 
 //go:embed ui/html ui/static
-var Files embed.FS 
+var Files embed.FS
 
 func connectDB(prod bool) (*sql.DB, error) {
 	var dsn string
@@ -33,7 +33,7 @@ func connectDB(prod bool) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		return nil, err 
+		return nil, err
 	}
 
 	if err := db.Ping(); err != nil {
@@ -48,10 +48,15 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
 	funcMap := template.FuncMap{
-		"add": func(a, b int) int { return a + b },
+		"percentage": func(remaining, total int) float64 {
+			if total == 0 {
+				return 0
+			}
+			return (float64(remaining) / float64(total)) * 100
+		},
 	}
 
-	pages, err := fs.Glob(Files, "ui/html/pages/*.tmpl")
+	pages, err := fs.Glob(Files, "ui/html/pages/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +65,8 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		patterns := []string{
-			"ui/html/base.tmpl",
+			"ui/html/base.html",
+			"ui/html/claimModal.html",
 			page,
 		}
 
