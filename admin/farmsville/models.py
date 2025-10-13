@@ -39,12 +39,12 @@ class Product(models.Model):
 class ProductClaimed(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='claims')
     datetime = models.DateTimeField()
-    user = models.CharField(max_length=200)
+    user_name = models.CharField(max_length=200)
     qty = models.IntegerField()
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user} - {self.qty} of {self.product.product_name.name} ({self.datetime})"
+        return f"{self.user_name} - {self.qty} of {self.product.product_name.name} ({self.datetime})"
 
     class Meta:
         ordering = ['-datetime']

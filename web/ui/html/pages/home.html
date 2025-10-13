@@ -20,8 +20,7 @@
                     </div>
                     <span class="text-gray-600">{{.Remaining}} / {{.Qty}}</span>
                 </div>
-                <button class="btn" {{if le .Remaining
-                    0}}disabled{{else}}onclick="document.getElementById('claim-modal').style.display='flex'" {{end}}>
+                <button class="btn" {{if le .Remaining 0}}disabled{{else}}onclick="openClaimModal({{.ID}}, '{{.ProductName}}', {{.Remaining}}, {{.Qty}})"{{end}}>
                     {{if le .Remaining 0}}Out of Stock{{else}}Claim{{end}}
                 </button>
             </div>

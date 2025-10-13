@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('datetime', models.DateTimeField()),
-                ('user', models.CharField(max_length=200)),
+                ('user_name', models.CharField(max_length=200)),
                 ('qty', models.IntegerField()),
                 ('notes', models.TextField(blank=True, null=True)),
                 ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='claims', to='farmsville.product')),

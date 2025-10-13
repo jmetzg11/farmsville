@@ -39,7 +39,7 @@ class Command(BaseCommand):
         ProductClaimed.objects.create(
             product=products[0],
             datetime=timezone.now(),
-            user='Jack',
+            user_name='Jack',
             qty=3,
             notes='Perfect for breakfast!'
         )
@@ -50,14 +50,14 @@ class Command(BaseCommand):
         ProductClaimed.objects.create(
             product=products[1],
             datetime=timezone.now(),
-            user='Jill',
+            user_name='Jill',
             qty=6,
             notes='Great for mashing!'
         )
         ProductClaimed.objects.create(
             product=products[1],
             datetime=timezone.now(),
-            user='Mary',
+            user_name='Mary',
             qty=4,
             notes='Making soup tonight'
         )

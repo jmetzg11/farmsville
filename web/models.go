@@ -40,7 +40,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 			COALESCE(json_agg(DISTINCT jsonb_build_object(
 				'id', pc.id,
 				'datetime', pc.datetime,
-				'user', pc.user,
+				'user', pc.user_name,
 				'product_name', pn.name,
 				'qty', pc.qty,
 				'notes', COALESCE(pc.notes, '')
@@ -97,4 +97,54 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 	}
 
 	return products, allClaims, nil
+}
+
+func (app *application) getProductRemaining(productID int) (int, error) {
+	var remaining int
+	query := `SELECT remaining FROM farmsville_product WHERE id = $1`
+	err := app.db.QueryRow(query, productID).Scan(&remaining)
+	if err != nil {
+		return 0, err
+	}
+	return remaining, nil
+}
+
+func (app *application) createProductClaim(productID int, qty int, name string, notes string) error {
+	tx, err := app.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Get current remaining with row lock to prevent race conditions
+	var remaining int
+	query := `SELECT remaining FROM farmsville_product WHERE id = $1 FOR UPDATE`
+	err = tx.QueryRow(query, productID).Scan(&remaining)
+	if err != nil {
+		return err
+	}
+
+	// Validate quantity
+	if qty > remaining {
+		return err
+	}
+
+	// Update remaining quantity
+	updateQuery := `UPDATE farmsville_product SET remaining = remaining - $1 WHERE id = $2`
+	_, err = tx.Exec(updateQuery, qty, productID)
+	if err != nil {
+		return err
+	}
+
+	// Insert claim record
+	insertQuery := `
+		INSERT INTO farmsville_productclaimed (product_id, qty, user_name, notes, datetime)
+		VALUES ($1, $2, $3, $4, NOW())
+	`
+	_, err = tx.Exec(insertQuery, productID, qty, name, notes)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }

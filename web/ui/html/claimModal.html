@@ -1,13 +1,32 @@
 {{define "claimModal"}}
-<!-- Modal -->
 <div id="claim-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="text-xl font-bold">Claim Item</h3>
-            <button class="modal-close" onclick="document.getElementById('claim-modal').style.display='none'">&times;</button>
+            <h3 class="text-xl font-bold">Claim <span id="modal-product-name"></span></h3>
         </div>
         <div class="modal-body">
-            <p>Form will go here</p>
+            <p class="text-gray-600 mb-4">
+                Available: <span id="modal-remaining"></span> / <span id="modal-qty"></span>
+            </p>
+            <div id="claim-error" style="display: none;" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            </div>
+            <form id="claim-form" hx-post="/claim" hx-swap="none" hx-on::after-request="handleClaimResponse(event)">
+                <input type="hidden" id="product-id" name="product_id">
+
+                <div class="mb-4">
+                    <label for="claim-qty" class="modal-label">Quantity</label>
+                    <input type="number" id="claim-qty" name="qty" min="1" required class="modal-input">
+                </div>
+
+                <div class="mb-4">
+                    <label for="claim-name" class="modal-label">Your Name</label>
+                    <input type="text" id="claim-name" name="name" required class="modal-input">
+                </div>
+            </form>
+        </div>
+        <div class="modal-bottom-container">
+            <button type="submit" form="claim-form" class="btn">Claim</button>
+            <button type="button" onclick="closeClaimModal()" class="btn-close">Close</button>
         </div>
     </div>
 </div>
