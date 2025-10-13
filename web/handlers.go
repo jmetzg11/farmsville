@@ -30,7 +30,8 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad Request"))
 		return
 	}
 
@@ -64,7 +65,8 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 	remaining, err := app.getProductRemaining(productID)
 	if err != nil {
 		log.Printf("Error fetching product remaining: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
 		return
 	}
 
@@ -80,7 +82,8 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 	err = app.createProductClaim(productID, qty, name, notes)
 	if err != nil {
 		log.Printf("Error creating product claim: %v", err)
-		http.Error(w, "Failed to create claim", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to create claim"))
 		return
 	}
 
