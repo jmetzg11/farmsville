@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
-from farmsville.models import Event, ProductName, Product, ProductClaimed
+from farmsville.models import Event, ProductName, Photo, Product, ProductClaimed
 
 
 class Command(BaseCommand):
@@ -12,54 +12,106 @@ class Command(BaseCommand):
         event_date = timezone.now().date() + timedelta(days=5)
         event, created = Event.objects.get_or_create(date=event_date)
 
-        # Product names, photos, and notes
+        # Create photos based on actual files in dev_photos/
+        photo_data = [
+            ('chicken.jpg', 'Fresh farm chicken'),
+            ('cow.jpg', 'Grass-fed cow'),
+            ('llama.jpeg', 'Friendly llama'),
+            ('llama_2.jpeg', 'Another llama'),
+            ('rooster.png', 'Morning rooster'),
+            ('apple.png', 'Fresh apple'),
+        ]
+
+        photos = {}
+        for filename, caption in photo_data:
+            photo, _ = Photo.objects.get_or_create(
+                filename=filename,
+                defaults={'caption': caption}
+            )
+            photos[filename] = photo
+
+        # Product names, photos, quantities, and notes
         product_data = [
-            ('Eggs', 'chicken.jpg', 'Farm fresh, free-range'),
-            ('Potatoes', 'cow_2.jpg', 'Organic, locally grown'),
-            ('Tomatoes', 'cow.jpg', 'Vine-ripened heirloom'),
-            ('Cookies', 'llama_2.jpeg', 'Freshly baked this morning'),
-            ('Carrots', 'llama.jpeg', 'Sweet and crisp'),
+            ('Chicken', 'chicken.jpg', 12, 'Farm fresh, free-range'),
+            ('Cow', 'cow.jpg', 10, 'Grass-fed, organic'),
+            ('Llama', 'llama.jpeg', 8, 'Soft and warm'),
+            ('Llama 2', 'llama_2.jpeg', 15, 'Another friendly llama'),
+            ('Rooster', 'rooster.png', 10, 'Free-range rooster'),
+            ('Apple', 'apple.png', 20, 'Crisp and sweet'),
         ]
 
         products = []
-        for name, photo, notes in product_data:
+        for name, photo_filename, qty, notes in product_data:
             product_name, _ = ProductName.objects.get_or_create(name=name)
 
             product = Product.objects.create(
                 event=event,
                 product_name=product_name,
-                qty=10,
-                remaining=10,
+                qty=qty,
+                remaining=qty,
                 notes=notes,
-                photo_url=f'/dev_photos/{photo}'
+                photo=photos[photo_filename]
             )
             products.append(product)
 
-        # First product: 1 claim (doesn't take all qty)
+        # First product (Chicken): Jack claims some - partial stock
         ProductClaimed.objects.create(
             product=products[0],
             datetime=timezone.now(),
             user_name='Jack',
             qty=3,
-            notes='Perfect for breakfast!'
+            notes='Perfect for dinner!'
         )
-        products[0].remaining = 7
+        products[0].remaining = 9
         products[0].save()
 
-        # Second product: 2 claims (takes all qty)
+        # Second product (Cow): Multiple claims - OUT OF STOCK
         ProductClaimed.objects.create(
             product=products[1],
             datetime=timezone.now(),
             user_name='Jill',
             qty=6,
-            notes='Great for mashing!'
+            notes='Need for the ranch'
         )
         ProductClaimed.objects.create(
             product=products[1],
             datetime=timezone.now(),
             user_name='Mary',
-            qty=4,
-            notes='Making soup tonight'
+            qty=4
         )
         products[1].remaining = 0
         products[1].save()
+
+        # Third product (Llama): Fully stocked - NO CLAIMS
+        # No claims, stays at full stock
+
+        # Fourth product (Llama 2): Sarah claims with note
+        ProductClaimed.objects.create(
+            product=products[3],
+            datetime=timezone.now(),
+            user_name='Sarah',
+            qty=5,
+            notes='So cute and friendly!'
+        )
+        products[3].remaining = 10
+        products[3].save()
+
+        # Fifth product (Rooster): Jill claims without note
+        ProductClaimed.objects.create(
+            product=products[4],
+            datetime=timezone.now(),
+            user_name='Jill',
+            qty=4
+        )
+        products[4].remaining = 6
+        products[4].save()
+
+        # Sixth product (Apple): Jack claims without note
+        ProductClaimed.objects.create(
+            product=products[5],
+            datetime=timezone.now(),
+            user_name='Jack',
+            qty=8
+        )
+        products[5].remaining = 12
+        products[5].save()

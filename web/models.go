@@ -36,7 +36,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 			p.qty,
 			p.remaining,
 			COALESCE(p.notes, '') as notes,
-			COALESCE(p.photo_url, '') as photo_url,
+			COALESCE(ph.filename, '') as photo_url,
 			COALESCE(json_agg(DISTINCT jsonb_build_object(
 				'id', pc.id,
 				'datetime', pc.datetime,
@@ -48,9 +48,10 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		FROM farmsville_product p
 		JOIN farmsville_event e ON p.event_id = e.id
 		JOIN farmsville_productname pn ON p.product_name_id = pn.id
+		LEFT JOIN farmsville_photo ph ON p.photo_id = ph.id
 		LEFT JOIN farmsville_productclaimed pc ON p.id = pc.product_id
 		WHERE e.date > $1
-		GROUP BY p.id, p.event_id, pn.name, p.qty, p.remaining, p.notes, p.photo_url, e.date
+		GROUP BY p.id, p.event_id, pn.name, p.qty, p.remaining, p.notes, ph.filename, e.date
 		ORDER BY e.date, pn.name
 	`
 
@@ -82,7 +83,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		}
 
 		if p.PhotoURL != "" {
-			p.PhotoURL = os.Getenv("PHOTOS_URL") + p.PhotoURL
+			p.PhotoURL = os.Getenv("PHOTOS_URL") + "/dev_photos/" + p.PhotoURL
 		}
 
 		products = append(products, p)

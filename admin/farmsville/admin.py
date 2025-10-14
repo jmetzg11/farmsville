@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Event, ProductName, Product, ProductClaimed
+from .models import Event, ProductName, Photo, Product, ProductClaimed
 
 
 @admin.register(Event)
@@ -39,6 +39,61 @@ class ProductNameAdmin(admin.ModelAdmin):
     product_usage_count.short_description = 'Times Used'
 
 
+class PhotoAdminForm(forms.ModelForm):
+    upload_file = forms.FileField(required=False, label="Upload Photo")
+
+    class Meta:
+        model = Photo
+        fields = '__all__'
+
+
+@admin.register(Photo)
+class PhotoAdmin(admin.ModelAdmin):
+    form = PhotoAdminForm
+    list_display = ['filename', 'caption', 'photo_preview', 'usage_count']
+    search_fields = ['filename', 'caption']
+    fields = ['filename', 'caption', 'upload_file', 'photo_preview']
+    readonly_fields = ['photo_preview']
+
+    def usage_count(self, obj):
+        return obj.products.count()
+    usage_count.short_description = 'Used By'
+
+    def photo_preview(self, obj):
+        if obj.filename:
+            full_url = f"{settings.PHOTOS_URL}/dev_photos/{obj.filename}"
+            return format_html(
+                '<img src="{}" style="max-width: 400px; max-height: 400px; border: 1px solid #ddd; border-radius: 4px;" />',
+                full_url
+            )
+        return "No photo"
+    photo_preview.short_description = 'Preview'
+
+    def save_model(self, request, obj, form, change):
+        if settings.IS_PRODUCTION:
+            # TODO: Implement photo upload for production (e.g., S3, CDN)
+            # For now, just save the model without handling photo uploads
+            super().save_model(request, obj, form, change)
+            return
+
+        upload_file = form.cleaned_data.get('upload_file')
+
+        if upload_file:
+            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
+
+            # Save new photo
+            filename = upload_file.name
+            filepath = photos_base / filename
+
+            with open(filepath, 'wb+') as destination:
+                for chunk in upload_file.chunks():
+                    destination.write(chunk)
+
+            obj.filename = filename
+
+        super().save_model(request, obj, form, change)
+
+
 class ProductClaimedInline(admin.TabularInline):
     model = ProductClaimed
     extra = 0
@@ -47,33 +102,21 @@ class ProductClaimedInline(admin.TabularInline):
     can_delete = True
 
 
-class ProductAdminForm(forms.ModelForm):
-    photo_upload = forms.ImageField(required=False, label="Upload Photo")
-
-    class Meta:
-        model = Product
-        fields = '__all__'
-        widgets = {
-            'photo_url': forms.HiddenInput(),
-        }
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    form = ProductAdminForm
     list_display = ['product_name', 'event', 'qty', 'remaining', 'claimed_qty',
                     'availability_status', 'has_photo']
     list_filter = ['event', 'product_name']
     search_fields = ['product_name__name', 'notes']
-    autocomplete_fields = ['product_name']
+    autocomplete_fields = ['product_name', 'photo']
     date_hierarchy = 'event__date'
-    fields = ['event', 'product_name', 'qty', 'remaining', 'notes', 'photo_preview', 'photo_upload']
+    fields = ['event', 'product_name', 'qty', 'remaining', 'notes', 'photo', 'photo_preview']
     readonly_fields = ['photo_preview']
     inlines = [ProductClaimedInline]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related('event', 'product_name').prefetch_related('claims')
+        return qs.select_related('event', 'product_name', 'photo').prefetch_related('claims')
 
     def claimed_qty(self, obj):
         return sum(claim.qty for claim in obj.claims.all())
@@ -96,54 +139,19 @@ class ProductAdmin(admin.ModelAdmin):
     availability_status.short_description = 'Status'
 
     def has_photo(self, obj):
-        return bool(obj.photo_url)
+        return bool(obj.photo)
     has_photo.short_description = 'Photo'
     has_photo.boolean = True
 
     def photo_preview(self, obj):
-        if obj.photo_url:
-            full_url = f"{settings.PHOTOS_URL}/{obj.photo_url}"
+        if obj.photo and obj.photo.filename:
+            full_url = f"{settings.PHOTOS_URL}/dev_photos/{obj.photo.filename}"
             return format_html(
                 '<img src="{}" style="max-width: 400px; max-height: 400px; border: 1px solid #ddd; border-radius: 4px;" />',
                 full_url
             )
         return "No photo"
     photo_preview.short_description = 'Current Photo'
-
-    def save_model(self, request, obj, form, change):
-        if settings.IS_PRODUCTION:
-            # TODO: Implement photo upload for production (e.g., S3, CDN)
-            # For now, just save the model without handling photo uploads
-            super().save_model(request, obj, form, change)
-            return
-
-        photo_upload = form.cleaned_data.get('photo_upload')
-
-        if photo_upload:
-            photos_base = settings.BASE_DIR.parent.parent / 'data' / 'photos'
-
-            # Delete old photo if exists
-            if obj.photo_url:
-                old_photo_path = photos_base / obj.photo_url
-                if old_photo_path.exists():
-                    old_photo_path.unlink()
-
-            # Create directory for this event date
-            event_dir = str(obj.event.date)
-            event_path = photos_base / event_dir
-            event_path.mkdir(parents=True, exist_ok=True)
-
-            # Save new photo
-            filename = photo_upload.name
-            filepath = event_path / filename
-
-            with open(filepath, 'wb+') as destination:
-                for chunk in photo_upload.chunks():
-                    destination.write(chunk)
-
-            obj.photo_url = f"{event_dir}/{filename}"
-
-        super().save_model(request, obj, form, change)
 
 
 @admin.register(ProductClaimed)
@@ -157,7 +165,6 @@ class ProductClaimedAdmin(admin.ModelAdmin):
     fields = ['product', 'datetime', 'user_name', 'qty', 'notes']
 
     def get_queryset(self, request):
-        """Optimize queries with select_related"""
         qs = super().get_queryset(request)
         return qs.select_related('product', 'product__event', 'product__product_name')
 

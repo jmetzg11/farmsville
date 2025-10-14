@@ -21,13 +21,24 @@ class ProductName(models.Model):
         ordering = ['name']
 
 
+class Photo(models.Model):
+    filename = models.CharField(max_length=200, unique=True)
+    caption = models.CharField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return self.filename
+
+    class Meta:
+        ordering = ['caption', 'filename']
+
+
 class Product(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='products')
     product_name = models.ForeignKey(ProductName, on_delete=models.PROTECT, related_name='products')
     qty = models.IntegerField()
     remaining = models.IntegerField()
     notes = models.TextField(blank=True, null=True)
-    photo_url = models.URLField(max_length=500, blank=True, null=True)
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
 
     def __str__(self):
         return f"{self.product_name.name} - {self.qty} ({self.event.date})"
