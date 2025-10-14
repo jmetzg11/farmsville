@@ -98,14 +98,30 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 	buf.WriteTo(w)
 }
 
-var limiter = rate.NewLimiter(2, 5)
+var limiter = rate.NewLimiter(4, 10)
 
 func rateLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip rate limiting for static assets
+		if isStaticAsset(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		if !limiter.Allow() {
 			http.Error(w, "Too many requests", http.StatusTooManyRequests)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func isStaticAsset(path string) bool {
+	staticPrefixes := []string{"/static/", "/data/photos/"}
+	for _, prefix := range staticPrefixes {
+		if len(path) >= len(prefix) && path[:len(prefix)] == prefix {
+			return true
+		}
+	}
+	return false
 }

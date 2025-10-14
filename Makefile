@@ -19,6 +19,8 @@ stop:
 	-pkill -f "manage.py runserver"
 	@echo "Stopping Go backend..."
 	-pkill -f "tmp/main"
+	@echo "Cleaning up Go build artifacts..."
+	-rm -f web/tmp/main
 	@echo "Stopping Tailwind CSS watcher..."
 	-pkill -f "tailwindcss.*--watch"
 	@echo "Stopping PostgreSQL..."

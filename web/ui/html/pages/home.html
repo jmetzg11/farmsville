@@ -42,6 +42,9 @@
                 <span class="text-gray-600">{{.User}}</span>
                 <span class="text-gray-600">{{.DateTime.Format "2006-01-02 15:04"}}</span>
             </div>
+            {{if .Notes}}
+            <p class="claimed-notes">{{.Notes}}</p>
+            {{end}}
         </div>
         {{end}}
     </div>

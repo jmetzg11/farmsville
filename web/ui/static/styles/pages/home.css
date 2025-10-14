@@ -45,3 +45,7 @@
 .item-row {
     @apply flex justify-between items-center;
 }
+
+.claimed-notes {
+    @apply text-gray-600 text-sm mt-4 pt-4 border-t border-gray-200;
+}
