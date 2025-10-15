@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Event, ProductName, Photo, Product, ProductClaimed
+from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock
 
 
 @admin.register(Event)
@@ -227,3 +227,53 @@ class ProductClaimedAdmin(admin.ModelAdmin):
         return bool(obj.notes)
     has_notes.short_description = 'Notes'
     has_notes.boolean = True
+
+
+class ContentBlockInline(admin.StackedInline):
+    model = ContentBlock
+    extra = 1
+    fields = ['block_type', 'order', 'text_content', 'photo', 'youtube_url']
+    autocomplete_fields = ['photo']
+
+    class Media:
+        css = {
+            'all': ('admin/css/forms.css',)
+        }
+
+
+@admin.register(BlogPost)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ['title', 'is_published', 'created_at', 'block_count']
+    list_filter = ['is_published', 'created_at']
+    search_fields = ['title']
+    date_hierarchy = 'created_at'
+    fields = ['title', 'is_published']
+    inlines = [ContentBlockInline]
+
+    def block_count(self, obj):
+        return obj.content_blocks.count()
+    block_count.short_description = 'Content Blocks'
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related('content_blocks')
+
+
+@admin.register(ContentBlock)
+class ContentBlockAdmin(admin.ModelAdmin):
+    list_display = ['blog_post', 'block_type', 'order', 'content_preview']
+    list_filter = ['block_type', 'blog_post']
+    search_fields = ['blog_post__title', 'text_content']
+    autocomplete_fields = ['blog_post', 'photo']
+    fields = ['blog_post', 'block_type', 'order', 'text_content', 'photo', 'youtube_url']
+
+    def content_preview(self, obj):
+        if obj.block_type == 'text' and obj.text_content:
+            preview = obj.text_content[:50]
+            return f"{preview}..." if len(obj.text_content) > 50 else preview
+        elif obj.block_type == 'photo' and obj.photo:
+            return f"Photo: {obj.photo.name}"
+        elif obj.block_type == 'youtube' and obj.youtube_url:
+            return f"YouTube: {obj.youtube_url}"
+        return "No content"
+    content_preview.short_description = 'Preview'

@@ -61,3 +61,44 @@ class ProductClaimed(models.Model):
     class Meta:
         ordering = ['-datetime']
         verbose_name_plural = "Products Claimed"
+
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class ContentBlock(models.Model):
+    BLOCK_TYPES = [
+        ('text', 'Text/Paragraph'),
+        ('photo', 'Photo'),
+        ('youtube', 'YouTube Video'),
+    ]
+
+    blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='content_blocks')
+    block_type = models.CharField(max_length=20, choices=BLOCK_TYPES)
+    order = models.IntegerField(default=0)
+
+    # Text content
+    text_content = models.TextField(blank=True, null=True, help_text="For text blocks")
+
+    # Photo content
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True,
+                             help_text="For photo blocks")
+
+    # YouTube content
+    youtube_url = models.URLField(blank=True, null=True, help_text="Full YouTube URL or video ID")
+
+    def __str__(self):
+        return f"{self.blog_post.title} - {self.get_block_type_display()} (Order: {self.order})"
+
+    class Meta:
+        ordering = ['blog_post', 'order']
