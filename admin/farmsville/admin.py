@@ -50,10 +50,10 @@ class PhotoAdminForm(forms.ModelForm):
 @admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
     form = PhotoAdminForm
-    list_display = ['filename', 'caption', 'photo_preview', 'usage_count']
-    search_fields = ['filename', 'caption']
-    fields = ['filename', 'caption', 'upload_file', 'photo_preview']
-    readonly_fields = ['photo_preview']
+    list_display = ['name', 'filename', 'caption', 'photo_preview', 'usage_count']
+    search_fields = ['name', 'filename', 'caption']
+    fields = ['name', 'caption', 'upload_file', 'filename', 'photo_preview']
+    readonly_fields = ['filename', 'photo_preview']
 
     def usage_count(self, obj):
         return obj.products.count()
@@ -92,6 +92,51 @@ class PhotoAdmin(admin.ModelAdmin):
             obj.filename = filename
 
         super().save_model(request, obj, form, change)
+
+    def delete_model(self, request, obj):
+        print("delete_model was called")
+        if settings.IS_PRODUCTION:
+            # TODO: Implement photo deletion for production (e.g., S3, CDN)
+            # For now, just delete the model without handling photo file deletion
+            super().delete_model(request, obj)
+            return
+
+        if obj.filename:
+            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
+            filepath = photos_base / obj.filename
+            print(f"Deleting file: {filepath}")
+
+            # Delete the photo file if it exists
+            if filepath.exists():
+                filepath.unlink()
+                print("File deleted successfully")
+            else:
+                print("File does not exist")
+
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        print("delete_queryset was called")
+        if settings.IS_PRODUCTION:
+            # TODO: Implement photo deletion for production (e.g., S3, CDN)
+            # For now, just delete the queryset without handling photo file deletion
+            super().delete_queryset(request, queryset)
+            return
+
+        photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
+
+        # Delete all photo files before deleting the records
+        for obj in queryset:
+            if obj.filename:
+                filepath = photos_base / obj.filename
+                print(f"Deleting file: {filepath}")
+                if filepath.exists():
+                    filepath.unlink()
+                    print("File deleted successfully")
+                else:
+                    print("File does not exist")
+
+        super().delete_queryset(request, queryset)
 
 
 class ProductClaimedInline(admin.TabularInline):

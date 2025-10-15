@@ -13,20 +13,21 @@ class Command(BaseCommand):
         event, created = Event.objects.get_or_create(date=event_date)
 
         # Create photos based on actual files in dev_photos/
+        # Format: (name, filename, caption)
         photo_data = [
-            ('chicken.jpg', 'Fresh farm chicken'),
-            ('cow.jpg', 'Grass-fed cow'),
-            ('llama.jpeg', 'Friendly llama'),
-            ('llama_2.jpeg', 'Another llama'),
-            ('rooster.png', 'Morning rooster'),
-            ('apple.png', 'Fresh apple'),
+            ('Chicken Photo', 'chicken.jpg', 'Fresh farm chicken'),
+            ('Cow Photo', 'cow.jpg', 'Grass-fed cow'),
+            ('Llama Photo', 'llama.jpeg', 'Friendly llama'),
+            ('Llama 2 Photo', 'llama_2.jpeg', 'Another llama'),
+            ('Rooster Photo', 'rooster.png', 'Morning rooster'),
+            ('Apple Photo', 'apple.png', 'Fresh apple'),
         ]
 
         photos = {}
-        for filename, caption in photo_data:
+        for name, filename, caption in photo_data:
             photo, _ = Photo.objects.get_or_create(
                 filename=filename,
-                defaults={'caption': caption}
+                defaults={'name': name, 'caption': caption}
             )
             photos[filename] = photo
 

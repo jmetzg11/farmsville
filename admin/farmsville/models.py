@@ -22,14 +22,15 @@ class ProductName(models.Model):
 
 
 class Photo(models.Model):
+    name = models.CharField(max_length=200, unique=True)
     filename = models.CharField(max_length=200, unique=True)
     caption = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
-        return self.filename
+        return self.name
 
     class Meta:
-        ordering = ['caption', 'filename']
+        ordering = ['name']
 
 
 class Product(models.Model):
