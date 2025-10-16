@@ -14,6 +14,7 @@ type Product struct {
 	Remaining   int
 	Notes       string
 	PhotoURL    string
+	PhotoType   string
 }
 
 type ProductClaimed struct {
@@ -37,6 +38,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 			p.remaining,
 			COALESCE(p.notes, '') as notes,
 			COALESCE(ph.filename, '') as photo_url,
+			COALESCE(ph.photo_type, '') as photo_type,
 			COALESCE(json_agg(DISTINCT jsonb_build_object(
 				'id', pc.id,
 				'datetime', pc.datetime,
@@ -51,7 +53,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		LEFT JOIN farmsville_photo ph ON p.photo_id = ph.id
 		LEFT JOIN farmsville_productclaimed pc ON p.id = pc.product_id
 		WHERE e.date > $1
-		GROUP BY p.id, p.event_id, pn.name, p.qty, p.remaining, p.notes, ph.filename, e.date
+		GROUP BY p.id, p.event_id, pn.name, p.qty, p.remaining, p.notes, ph.filename, ph.photo_type, e.date
 		ORDER BY e.date, pn.name
 	`
 
@@ -76,6 +78,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 			&p.Remaining,
 			&p.Notes,
 			&p.PhotoURL,
+			&p.PhotoType,
 			&claimsJSON,
 		)
 		if err != nil {
@@ -83,7 +86,11 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		}
 
 		if p.PhotoURL != "" {
-			p.PhotoURL = os.Getenv("PHOTOS_URL") + "/dev_photos/" + p.PhotoURL
+			subdir := "product"
+			if p.PhotoType == "blog" {
+				subdir = "blog"
+			}
+			p.PhotoURL = os.Getenv("PHOTOS_URL") + "/" + subdir + "/" + p.PhotoURL
 		}
 
 		products = append(products, p)
@@ -148,4 +155,47 @@ func (app *application) createProductClaim(productID int, qty int, name string, 
 	}
 
 	return tx.Commit()
+}
+
+type BlogPost struct {
+	ID          int
+	Title       string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	IsPublished bool
+}
+
+func (app *application) getBlogPosts() ([]BlogPost, error) {
+	query := `
+		SELECT id, title, created_at
+		FROM farmsville_blogpost
+		WHERE is_published = true
+		ORDER BY created_at DESC
+	`
+
+	rows, err := app.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []BlogPost
+	for rows.Next() {
+		var post BlogPost
+		err := rows.Scan(
+			&post.ID,
+			&post.Title,
+			&post.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

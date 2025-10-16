@@ -1,0 +1,20 @@
+{{define "main"}}
+
+<div class="section-container">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Blog</h2>
+
+    {{if .Posts}}
+    <div class="space-y-4">
+        {{range .Posts}}
+        <div class="border-b pb-4">
+            <a href="/blog/{{.ID}}" class="text-xl font-semibold text-gray-800 hover:text-blue-600">{{.Title}}</a>
+            <p class="text-sm text-gray-600">{{.CreatedAt.Format "January 2, 2006"}}</p>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <p class="text-gray-600">No blog posts available yet.</p>
+    {{end}}
+</div>
+
+{{end}}

@@ -22,15 +22,20 @@ class ProductName(models.Model):
 
 
 class Photo(models.Model):
+    class PhotoType(models.TextChoices):
+        PRODUCT = 'product', 'Product Photo'
+        BLOG = 'blog', 'Blog Photo'
+
     name = models.CharField(max_length=200, unique=True)
     filename = models.CharField(max_length=200, unique=True)
     caption = models.CharField(max_length=500, blank=True, null=True)
+    photo_type = models.CharField(max_length=20, choices=PhotoType.choices, default=PhotoType.PRODUCT)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} {self.photo_type}"
 
     class Meta:
-        ordering = ['name']
+        ordering = ['photo_type', 'name']
 
 
 class Product(models.Model):
@@ -77,14 +82,13 @@ class BlogPost(models.Model):
 
 
 class ContentBlock(models.Model):
-    BLOCK_TYPES = [
-        ('text', 'Text/Paragraph'),
-        ('photo', 'Photo'),
-        ('youtube', 'YouTube Video'),
-    ]
+    class BlockType(models.TextChoices):
+        TEXT = 'text', 'Text/Paragraph'
+        PHOTO = 'photo', 'Photo'
+        YOUTUBE = 'youtube', 'YouTube Video'
 
     blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='content_blocks')
-    block_type = models.CharField(max_length=20, choices=BLOCK_TYPES)
+    block_type = models.CharField(max_length=20, choices=BlockType.choices)
     order = models.IntegerField(default=0)
 
     # Text content
@@ -95,7 +99,7 @@ class ContentBlock(models.Model):
                              help_text="For photo blocks")
 
     # YouTube content
-    youtube_url = models.URLField(blank=True, null=True, help_text="Full YouTube URL or video ID")
+    youtube_url = models.CharField(max_length=200, blank=True, null=True, help_text="YouTube video ID (e.g., 'rmojioqOlzk')")
 
     def __str__(self):
         return f"{self.blog_post.title} - {self.get_block_type_display()} (Order: {self.order})"

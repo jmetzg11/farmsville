@@ -66,7 +66,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 		patterns := []string{
 			"ui/html/base.html",
-			"ui/html/claimModal.html",
+			"ui/html/claim_modal.html",
 			page,
 		}
 

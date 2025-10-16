@@ -50,9 +50,10 @@ class PhotoAdminForm(forms.ModelForm):
 @admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
     form = PhotoAdminForm
-    list_display = ['name', 'filename', 'caption', 'photo_preview', 'usage_count']
+    list_display = ['name', 'filename', 'photo_type', 'caption', 'photo_preview', 'usage_count']
+    list_filter = ['photo_type']
     search_fields = ['name', 'filename', 'caption']
-    fields = ['name', 'caption', 'upload_file', 'filename', 'photo_preview']
+    fields = ['name', 'photo_type', 'caption', 'upload_file', 'filename', 'photo_preview']
     readonly_fields = ['filename', 'photo_preview']
 
     def usage_count(self, obj):
@@ -61,7 +62,8 @@ class PhotoAdmin(admin.ModelAdmin):
 
     def photo_preview(self, obj):
         if obj.filename:
-            full_url = f"{settings.PHOTOS_URL}/dev_photos/{obj.filename}"
+            subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+            full_url = f"{settings.PHOTOS_URL}/{subdir}/{obj.filename}"
             return format_html(
                 '<img src="{}" style="max-width: 400px; max-height: 400px; border: 1px solid #ddd; border-radius: 4px;" />',
                 full_url
@@ -79,9 +81,9 @@ class PhotoAdmin(admin.ModelAdmin):
         upload_file = form.cleaned_data.get('upload_file')
 
         if upload_file:
-            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
+            subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
 
-            # Save new photo
             filename = upload_file.name
             filepath = photos_base / filename
 
@@ -102,11 +104,11 @@ class PhotoAdmin(admin.ModelAdmin):
             return
 
         if obj.filename:
-            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
+            subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
             filepath = photos_base / obj.filename
             print(f"Deleting file: {filepath}")
 
-            # Delete the photo file if it exists
             if filepath.exists():
                 filepath.unlink()
                 print("File deleted successfully")
@@ -123,11 +125,10 @@ class PhotoAdmin(admin.ModelAdmin):
             super().delete_queryset(request, queryset)
             return
 
-        photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / 'dev_photos'
-
-        # Delete all photo files before deleting the records
         for obj in queryset:
             if obj.filename:
+                subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+                photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
                 filepath = photos_base / obj.filename
                 print(f"Deleting file: {filepath}")
                 if filepath.exists():
@@ -147,8 +148,20 @@ class ProductClaimedInline(admin.TabularInline):
     can_delete = True
 
 
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'photo' in self.fields:
+            self.fields['photo'].queryset = Photo.objects.filter(photo_type=Photo.PhotoType.PRODUCT)
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     list_display = ['product_name', 'event', 'qty', 'remaining', 'claimed_qty',
                     'availability_status', 'has_photo']
     list_filter = ['event', 'product_name']
@@ -190,7 +203,8 @@ class ProductAdmin(admin.ModelAdmin):
 
     def photo_preview(self, obj):
         if obj.photo and obj.photo.filename:
-            full_url = f"{settings.PHOTOS_URL}/dev_photos/{obj.photo.filename}"
+            subdir = 'product' if obj.photo.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+            full_url = f"{settings.PHOTOS_URL}/{subdir}/{obj.photo.filename}"
             return format_html(
                 '<img src="{}" style="max-width: 400px; max-height: 400px; border: 1px solid #ddd; border-radius: 4px;" />',
                 full_url
@@ -235,10 +249,22 @@ class ContentBlockInline(admin.StackedInline):
     fields = ['block_type', 'order', 'text_content', 'photo', 'youtube_url']
     autocomplete_fields = ['photo']
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "photo":
+            kwargs["queryset"] = Photo.objects.filter(photo_type=Photo.PhotoType.BLOG)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        if obj:
+            existing_count = obj.content_blocks.count()
+            formset.form.base_fields['order'].initial = existing_count + 1
+        else:
+            formset.form.base_fields['order'].initial = 1
+        return formset
+
     class Media:
-        css = {
-            'all': ('admin/css/forms.css',)
-        }
+        js = ('admin.js',)
 
 
 @admin.register(BlogPost)
@@ -259,21 +285,3 @@ class BlogPostAdmin(admin.ModelAdmin):
         return qs.prefetch_related('content_blocks')
 
 
-@admin.register(ContentBlock)
-class ContentBlockAdmin(admin.ModelAdmin):
-    list_display = ['blog_post', 'block_type', 'order', 'content_preview']
-    list_filter = ['block_type', 'blog_post']
-    search_fields = ['blog_post__title', 'text_content']
-    autocomplete_fields = ['blog_post', 'photo']
-    fields = ['blog_post', 'block_type', 'order', 'text_content', 'photo', 'youtube_url']
-
-    def content_preview(self, obj):
-        if obj.block_type == 'text' and obj.text_content:
-            preview = obj.text_content[:50]
-            return f"{preview}..." if len(obj.text_content) > 50 else preview
-        elif obj.block_type == 'photo' and obj.photo:
-            return f"Photo: {obj.photo.name}"
-        elif obj.block_type == 'youtube' and obj.youtube_url:
-            return f"YouTube: {obj.youtube_url}"
-        return "No content"
-    content_preview.short_description = 'Preview'

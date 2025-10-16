@@ -90,3 +90,26 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Claim submitted successfully"))
 }
+
+type blogData struct {
+	Posts []BlogPost
+}
+
+func (app *application) blog(w http.ResponseWriter, r *http.Request) {
+	posts, err := app.getBlogPosts()
+	if err != nil {
+		log.Printf("Error fetching blog posts: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	data := blogData{
+		Posts: posts,
+	}
+
+	app.render(w, http.StatusOK, "blog.html", data)
+}
+
+func (app *application) blogDetail(w http.ResponseWriter, r *http.Request) {
+	app.render(w, http.StatusOK, "blog_detail.html", nil)
+}
