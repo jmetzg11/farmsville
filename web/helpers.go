@@ -8,8 +8,10 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/smtp"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"golang.org/x/time/rate"
@@ -124,4 +126,63 @@ func isStaticAsset(path string) bool {
 		}
 	}
 	return false
+}
+
+type ClaimNotification struct {
+	ID          int
+	ProductName string
+	Qty         int
+	UserName    string
+	Notes       string
+}
+
+func (app *application) sendClaimEmail(claim ClaimNotification) error {
+	gmailUser := os.Getenv("GMAIL_USER")
+	gmailPass := os.Getenv("GMAIL_PASS")
+	adminEmails := os.Getenv("ADMIN_EMAILS")
+
+	if gmailUser == "" || gmailPass == "" {
+		return fmt.Errorf("email credentials not configured")
+	}
+
+	if adminEmails == "" {
+		return fmt.Errorf("admin emails not configured")
+	}
+
+	recipients := strings.Split(adminEmails, ",")
+	for i := range recipients {
+		recipients[i] = strings.TrimSpace(recipients[i])
+	}
+
+	subject := fmt.Sprintf("New Product Claim: %s", claim.ProductName)
+	body := fmt.Sprintf(`A new product has been claimed:
+
+Product: %s
+Quantity: %d
+Claimed by: %s
+Notes: %s
+
+`, claim.ProductName, claim.Qty, claim.UserName, claim.Notes)
+
+	message := []byte(fmt.Sprintf("From: %s\r\n"+
+		"To: %s\r\n"+
+		"Subject: %s\r\n"+
+		"\r\n"+
+		"%s\r\n", gmailUser, strings.Join(recipients, ","), subject, body))
+
+	auth := smtp.PlainAuth("", gmailUser, gmailPass, "smtp.gmail.com")
+
+	err := smtp.SendMail(
+		"smtp.gmail.com:587",
+		auth,
+		gmailUser,
+		recipients,
+		message,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return nil
 }

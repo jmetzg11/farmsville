@@ -117,44 +117,59 @@ func (app *application) getProductRemaining(productID int) (int, error) {
 	return remaining, nil
 }
 
-func (app *application) createProductClaim(productID int, qty int, name string, notes string) error {
+type CreateClaimParams struct {
+	ProductID int
+	Qty       int
+	UserName  string
+	Notes     string
+}
+
+func (app *application) createProductClaim(params CreateClaimParams) (string, error) {
 	tx, err := app.db.Begin()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer tx.Rollback()
 
-	// Get current remaining with row lock to prevent race conditions
 	var remaining int
-	query := `SELECT remaining FROM farmsville_product WHERE id = $1 FOR UPDATE`
-	err = tx.QueryRow(query, productID).Scan(&remaining)
+	var productName string
+	query := `
+		SELECT p.remaining, pn.name
+		FROM farmsville_product p
+		JOIN farmsville_productname pn ON p.product_name_id = pn.id
+		WHERE p.id = $1
+		FOR UPDATE
+	`
+	err = tx.QueryRow(query, params.ProductID).Scan(&remaining, &productName)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// Validate quantity
-	if qty > remaining {
-		return err
+	if params.Qty > remaining {
+		return "", err
 	}
 
-	// Update remaining quantity
 	updateQuery := `UPDATE farmsville_product SET remaining = remaining - $1 WHERE id = $2`
-	_, err = tx.Exec(updateQuery, qty, productID)
+	_, err = tx.Exec(updateQuery, params.Qty, params.ProductID)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// Insert claim record
 	insertQuery := `
 		INSERT INTO farmsville_productclaimed (product_id, qty, user_name, notes, datetime)
 		VALUES ($1, $2, $3, $4, NOW())
 	`
-	_, err = tx.Exec(insertQuery, productID, qty, name, notes)
+	_, err = tx.Exec(insertQuery, params.ProductID, params.Qty, params.UserName, params.Notes)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return "", err
+	}
+
+	return productName, nil
 }
 
 type BlogPost struct {

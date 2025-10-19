@@ -3,3 +3,5 @@
 @import './styles/base.css';
 @import './styles/modal.css';
 @import './styles/pages/home.css';
+@import './styles/pages/blog.css';
+@import './styles/pages/blog_detail.css';

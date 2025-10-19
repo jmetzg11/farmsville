@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -36,7 +35,6 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse and validate product ID
 	productIDStr := r.FormValue("product_id")
 	productID, err := strconv.Atoi(productIDStr)
 	if err != nil || productID <= 0 {
@@ -45,7 +43,6 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse and validate quantity
 	qtyStr := r.FormValue("qty")
 	qty, err := strconv.Atoi(qtyStr)
 	if err != nil || qty <= 0 {
@@ -54,7 +51,6 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate name
 	name := r.FormValue("name")
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -62,7 +58,6 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get current remaining from database (don't trust client data)
 	remaining, err := app.getProductRemaining(productID)
 	if err != nil {
 		log.Printf("Error fetching product remaining: %v", err)
@@ -71,22 +66,44 @@ func (app *application) claimProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate quantity against actual remaining
 	if qty > remaining {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Quantity must be at most " + strconv.Itoa(remaining)))
 		return
 	}
 
-	// Create the claim (this will update the database)
 	notes := r.FormValue("notes")
-	err = app.createProductClaim(productID, qty, name, notes)
+
+	createParams := CreateClaimParams{
+		ProductID: productID,
+		Qty:       qty,
+		UserName:  name,
+		Notes:     notes,
+	}
+
+	productName, err := app.createProductClaim(createParams)
 	if err != nil {
 		log.Printf("Error creating product claim: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to create claim"))
 		return
 	}
+
+	notifyParams := ClaimNotification{
+		ID:          productID,
+		ProductName: productName,
+		Qty:         qty,
+		UserName:    name,
+		Notes:       notes,
+	}
+
+	// goroutine to notify admin
+	go func() {
+		err := app.sendClaimEmail(notifyParams)
+		if err != nil {
+			log.Printf("Error sending claim email: %v", err)
+		}
+	}()
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Claim submitted successfully"))
@@ -125,7 +142,6 @@ func (app *application) blogDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Blog post not found", http.StatusNotFound)
 		return
 	}
-	fmt.Println(post)
 
 	app.render(w, http.StatusOK, "blog_detail.html", post)
 }
