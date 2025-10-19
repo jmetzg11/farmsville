@@ -1,0 +1,18 @@
+# Build artifacts
+web/tmp/
+web/node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.local
+
+# Development files
+admin/
+data/
+notes.txt
+Makefile
+README.md

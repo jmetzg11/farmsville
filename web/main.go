@@ -44,12 +44,12 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":3000",
 		Handler:      app.routes(*prod),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	fmt.Println("Server starting on :8080")
+	fmt.Println("Server starting on :3000")
 	log.Fatal(srv.ListenAndServe())
 }

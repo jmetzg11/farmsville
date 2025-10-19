@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
+from supabase import create_client
 from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock
 
 
@@ -72,70 +73,77 @@ class PhotoAdmin(admin.ModelAdmin):
     photo_preview.short_description = 'Preview'
 
     def save_model(self, request, obj, form, change):
-        if settings.IS_PRODUCTION:
-            # TODO: Implement photo upload for production (e.g., S3, CDN)
-            # For now, just save the model without handling photo uploads
-            super().save_model(request, obj, form, change)
-            return
-
         upload_file = form.cleaned_data.get('upload_file')
 
         if upload_file:
             subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
-            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
-
             filename = upload_file.name
-            filepath = photos_base / filename
 
-            with open(filepath, 'wb+') as destination:
-                for chunk in upload_file.chunks():
-                    destination.write(chunk)
+            if settings.IS_PRODUCTION:
+                supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+                file_content = upload_file.read()
+                bucket_name = 'photos'
+                file_path = f"{subdir}/{filename}"
 
-            obj.filename = filename
+                supabase.storage.from_(bucket_name).upload(
+                    file_path,
+                    file_content,
+                    file_options={"content-type": upload_file.content_type}
+                )
+
+                obj.filename = filename
+            else:
+                photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
+                filepath = photos_base / filename
+
+                with open(filepath, 'wb+') as destination:
+                    for chunk in upload_file.chunks():
+                        destination.write(chunk)
+
+                obj.filename = filename
 
         super().save_model(request, obj, form, change)
 
     def delete_model(self, request, obj):
-        print("delete_model was called")
-        if settings.IS_PRODUCTION:
-            # TODO: Implement photo deletion for production (e.g., S3, CDN)
-            # For now, just delete the model without handling photo file deletion
-            super().delete_model(request, obj)
-            return
-
         if obj.filename:
             subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
-            photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
-            filepath = photos_base / obj.filename
-            print(f"Deleting file: {filepath}")
 
-            if filepath.exists():
-                filepath.unlink()
-                print("File deleted successfully")
+            if settings.IS_PRODUCTION:
+                supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+                bucket_name = 'photos'
+                file_path = f"{subdir}/{obj.filename}"
+
+                supabase.storage.from_(bucket_name).remove([file_path])
             else:
-                print("File does not exist")
+                photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
+                filepath = photos_base / obj.filename
+
+                if filepath.exists():
+                    filepath.unlink()
 
         super().delete_model(request, obj)
 
     def delete_queryset(self, request, queryset):
-        print("delete_queryset was called")
         if settings.IS_PRODUCTION:
-            # TODO: Implement photo deletion for production (e.g., S3, CDN)
-            # For now, just delete the queryset without handling photo file deletion
-            super().delete_queryset(request, queryset)
-            return
+            supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+            bucket_name = 'photos'
+            file_paths = []
 
-        for obj in queryset:
-            if obj.filename:
-                subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
-                photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
-                filepath = photos_base / obj.filename
-                print(f"Deleting file: {filepath}")
-                if filepath.exists():
-                    filepath.unlink()
-                    print("File deleted successfully")
-                else:
-                    print("File does not exist")
+            for obj in queryset:
+                if obj.filename:
+                    subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+                    file_paths.append(f"{subdir}/{obj.filename}")
+
+            if file_paths:
+                supabase.storage.from_(bucket_name).remove(file_paths)
+        else:
+            for obj in queryset:
+                if obj.filename:
+                    subdir = 'product' if obj.photo_type == Photo.PhotoType.PRODUCT else 'blog'
+                    photos_base = settings.BASE_DIR.parent / 'data' / 'photos' / subdir
+                    filepath = photos_base / obj.filename
+                    if filepath.exists():
+                        filepath.unlink()
 
         super().delete_queryset(request, queryset)
 
