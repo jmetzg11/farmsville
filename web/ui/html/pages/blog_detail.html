@@ -1,8 +1,49 @@
 {{define "main"}}
 
 <div class="section-container">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Blog Detail</h2>
-    <p class="text-gray-600">blogDetail</p>
+    <div class="max-w-3xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{.Title}}</h1>
+            <p class="text-sm text-gray-600">{{.CreatedAt.Format "January 2, 2006"}}</p>
+        </div>
+
+        {{if .ContentBlocks}}
+        <div class="space-y-6">
+            {{range .ContentBlocks}}
+                {{if eq .BlockType "text"}}
+                    <div class="prose max-w-none">
+                        <p class="text-gray-700 whitespace-pre-wrap">{{.TextContent}}</p>
+                    </div>
+                {{else if eq .BlockType "photo"}}
+                    <div class="my-6">
+                        <img src="{{.PhotoURL}}" alt="{{.PhotoCaption}}" class="w-full h-auto max-h-96 object-contain rounded-lg shadow-md">
+                        {{if .PhotoCaption}}
+                        <p class="text-sm text-gray-600 italic mt-2">{{.PhotoCaption}}</p>
+                        {{end}}
+                    </div>
+                {{else if eq .BlockType "youtube"}}
+                    <div class="my-6">
+                        <div class="relative aspect-video">
+                            <iframe
+                                class="absolute inset-0 w-full h-full rounded-lg"
+                                src="https://www.youtube.com/embed/{{.YouTubeURL}}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                {{end}}
+            {{end}}
+        </div>
+        {{else}}
+        <p class="text-gray-600">No content available for this post.</p>
+        {{end}}
+
+        <div class="mt-8 pt-4 border-t">
+            <a href="/blog" class="text-blue-600 hover:text-blue-800">&larr; Back to Blog</a>
+        </div>
+    </div>
 </div>
 
 {{end}}

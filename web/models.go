@@ -199,3 +199,65 @@ func (app *application) getBlogPosts() ([]BlogPost, error) {
 
 	return posts, nil
 }
+
+type ContentBlock struct {
+	BlockType    string `json:"block_type"`
+	Order        int    `json:"order"`
+	TextContent  string `json:"text_content"`
+	PhotoURL     string `json:"photo_url"`
+	PhotoCaption string `json:"photo_caption"`
+	YouTubeURL   string `json:"youtube_url"`
+}
+
+type BlogPostDetail struct {
+	Title         string
+	CreatedAt     time.Time
+	ContentBlocks []ContentBlock
+}
+
+func (app *application) getBlogPostDetail(id int) (*BlogPostDetail, error) {
+	query := `
+		SELECT
+			bp.title,
+			bp.created_at,
+			COALESCE(json_agg(
+				jsonb_build_object(
+					'block_type', cb.block_type,
+					'order', cb.order,
+					'text_content', COALESCE(cb.text_content, ''),
+					'photo_url', COALESCE(ph.filename, ''),
+					'photo_caption', COALESCE(ph.caption, ''),
+					'youtube_url', COALESCE(cb.youtube_url, '')
+				) ORDER BY cb.order
+			) FILTER (WHERE cb.block_type IS NOT NULL), '[]') AS content_blocks
+		FROM farmsville_blogpost bp
+		LEFT JOIN farmsville_contentblock cb ON bp.id = cb.blog_post_id
+		LEFT JOIN farmsville_photo ph ON cb.photo_id = ph.id
+		WHERE bp.id = $1
+		GROUP BY bp.id, bp.title, bp.created_at
+	`
+
+	var post BlogPostDetail
+	var blocksJSON string
+
+	err := app.db.QueryRow(query, id).Scan(
+		&post.Title,
+		&post.CreatedAt,
+		&blocksJSON,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var blocks []ContentBlock
+	json.Unmarshal([]byte(blocksJSON), &blocks)
+
+	for i := range blocks {
+		if blocks[i].PhotoURL != "" {
+			blocks[i].PhotoURL = os.Getenv("PHOTOS_URL") + "/blog/" + blocks[i].PhotoURL
+		}
+	}
+
+	post.ContentBlocks = blocks
+	return &post, nil
+}

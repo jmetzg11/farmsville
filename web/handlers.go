@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -111,5 +112,20 @@ func (app *application) blog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) blogDetail(w http.ResponseWriter, r *http.Request) {
-	app.render(w, http.StatusOK, "blog_detail.html", nil)
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		http.Error(w, "Invalid blog post ID", http.StatusBadRequest)
+		return
+	}
+
+	post, err := app.getBlogPostDetail(id)
+	if err != nil {
+		log.Printf("Error fetching blog post detail: %v", err)
+		http.Error(w, "Blog post not found", http.StatusNotFound)
+		return
+	}
+	fmt.Println(post)
+
+	app.render(w, http.StatusOK, "blog_detail.html", post)
 }

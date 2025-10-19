@@ -121,9 +121,9 @@ class Command(BaseCommand):
 
         # Create blog photos
         blog_photo_1 = Photo.objects.create(
-            name='Default Blog Photo',
-            filename='default.jpeg',
-            caption='Default blog image',
+            name='Donkey face',
+            filename='download.jpeg',
+            caption='Smartest donkey on the farm',
             photo_type=Photo.PhotoType.BLOG
         )
 
