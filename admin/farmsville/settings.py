@@ -38,9 +38,9 @@ IS_PRODUCTION = os.environ.get('DJANGO_ENV', 'development') == 'production'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-kp8s=-2rxmnefp#)_%#^=7+u$a2($nw*8ox22apgq^umwlrrp9')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not IS_PRODUCTION
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't') if IS_PRODUCTION else True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else (['localhost', '127.0.0.1'] if not IS_PRODUCTION else [])
 
 # CSRF trusted origins for production
 if IS_PRODUCTION:

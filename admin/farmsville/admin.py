@@ -156,20 +156,8 @@ class ProductClaimedInline(admin.TabularInline):
     can_delete = True
 
 
-class ProductAdminForm(forms.ModelForm):
-    class Meta:
-        model = Product
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'photo' in self.fields:
-            self.fields['photo'].queryset = Photo.objects.filter(photo_type=Photo.PhotoType.PRODUCT)
-
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    form = ProductAdminForm
     list_display = ['product_name', 'event', 'qty', 'remaining', 'claimed_qty',
                     'availability_status', 'has_photo']
     list_filter = ['event', 'product_name']
