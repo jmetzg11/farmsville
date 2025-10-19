@@ -1,0 +1,42 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmsville</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="/static/helpers.js"></script>
+</head>
+
+<body>
+    <div class="header-container">
+        <header class="header">
+            <div class="header-wrapper">
+                <div class="text-xl font-bold">
+                    <a href="/">Farmsville</a>
+                </div>
+                <nav>
+                    <ul class="header-ul">
+                        <li>
+                            <a href="/" class="header-li">Inventory</a>
+                        </li>
+                        <li>
+                            <a href="/blog" class="header-li">Blog</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            {{template "main" .}}
+        </main>
+    </div>
+</body>
+
+</html>
+{{end}}

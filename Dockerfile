@@ -1,26 +1,45 @@
-FROM node:alpine AS frontend-builder
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
+# Build stage for CSS
+FROM node:20-alpine AS css-builder
+
+WORKDIR /app/web
+
+# Copy package files and install dependencies
+COPY web/package*.json ./
 RUN npm install
-COPY frontend/ ./
-RUN npm run build
 
-FROM golang:1.23-alpine AS go-builder
-WORKDIR /go/src/farmsville
-RUN apk add --no-cache gcc musl-dev
-COPY go.mod go.sum ./
+# Copy UI files and build Tailwind CSS
+COPY web/ui ./ui
+COPY web/tailwind.config.js ./
+RUN npm run build:css
+
+# Build stage for Go
+FROM golang:1.25-alpine AS go-builder
+
+WORKDIR /app/web
+
+# Copy go mod files
+COPY web/go.mod web/go.sum ./
 RUN go mod download
-COPY main.go ./
-COPY backend/ ./backend/
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o main .
 
+# Copy source code
+COPY web/*.go ./
+
+# Copy UI files including the built CSS from css-builder
+COPY --from=css-builder /app/web/ui ./ui
+
+# Build the Go binary with embedded files
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+
+# Runtime stage
 FROM alpine:latest
+
 WORKDIR /app
-RUN apk add --no-cache sqlite
 
-COPY --from=go-builder /go/src/farmsville/main /app/main
-COPY --from=frontend-builder /app/frontend/build /app/frontend/build
+# Copy only the binary (UI files are embedded in it)
+COPY --from=go-builder /app/web/main .
 
+# Expose port 3000 (matching fly.toml)
 EXPOSE 3000
 
-CMD ["/app/main"]
+# Run the application with -prod flag
+CMD ["./main", "-prod"]

@@ -1,0 +1,23 @@
+.blog-title {
+    @apply text-2xl font-bold text-gray-800 mb-6 border-b pb-2;
+}
+
+.blog-posts-container {
+    @apply space-y-4;
+}
+
+.blog-post-item {
+    @apply border-b pb-4;
+}
+
+.blog-post-link {
+    @apply text-xl font-semibold text-gray-800 hover:text-blue-600;
+}
+
+.blog-post-date {
+    @apply text-sm text-gray-600;
+}
+
+.blog-no-posts {
+    @apply text-gray-600;
+}

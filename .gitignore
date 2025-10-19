@@ -1,4 +1,8 @@
-data
+data/*
+!data/docker-compose.yml
+!data/photos/
+data/photos/*
+!data/photos/dev_photos/
 
 tmp
 
@@ -8,3 +12,8 @@ main
 fly.toml
 
 .env
+
+.venv
+
+__pycache__/
+*.pyc

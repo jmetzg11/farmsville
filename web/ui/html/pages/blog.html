@@ -1,0 +1,20 @@
+{{define "main"}}
+
+<div class="section-container">
+    <h2 class="blog-title">Blog</h2>
+
+    {{if .Posts}}
+    <div class="blog-posts-container">
+        {{range .Posts}}
+        <div class="blog-post-item">
+            <a href="/blog/{{.ID}}" class="blog-post-link">{{.Title}}</a>
+            <p class="blog-post-date">{{.CreatedAt.Format "January 2, 2006"}}</p>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <p class="blog-no-posts">No blog posts available yet.</p>
+    {{end}}
+</div>
+
+{{end}}

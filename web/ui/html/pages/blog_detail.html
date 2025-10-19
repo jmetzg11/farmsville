@@ -1,0 +1,49 @@
+{{define "main"}}
+
+<div class="section-container">
+    <div class="blog-detail-container">
+        <div class="blog-detail-header">
+            <h1 class="blog-detail-title">{{.Title}}</h1>
+            <p class="blog-detail-date">{{.CreatedAt.Format "January 2, 2006"}}</p>
+        </div>
+
+        {{if .ContentBlocks}}
+        <div class="blog-content-blocks">
+            {{range .ContentBlocks}}
+                {{if eq .BlockType "text"}}
+                    <div class="blog-text-block">
+                        <p class="blog-text-content">{{.TextContent}}</p>
+                    </div>
+                {{else if eq .BlockType "photo"}}
+                    <div class="blog-photo-block">
+                        <img src="{{.PhotoURL}}" alt="{{.PhotoCaption}}" class="blog-photo-img">
+                        {{if .PhotoCaption}}
+                        <p class="blog-photo-caption">{{.PhotoCaption}}</p>
+                        {{end}}
+                    </div>
+                {{else if eq .BlockType "youtube"}}
+                    <div class="blog-youtube-block">
+                        <div class="blog-youtube-wrapper">
+                            <iframe
+                                class="blog-youtube-iframe"
+                                src="https://www.youtube.com/embed/{{.YouTubeURL}}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                {{end}}
+            {{end}}
+        </div>
+        {{else}}
+        <p class="blog-no-content">No content available for this post.</p>
+        {{end}}
+
+        <div class="blog-detail-footer">
+            <a href="/blog" class="blog-back-link">&larr; Back to Blog</a>
+        </div>
+    </div>
+</div>
+
+{{end}}
