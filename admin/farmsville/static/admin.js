@@ -34,11 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setupInline(inline) {
-        const blockTypeSelect = inline.find('select[name$="-block_type"]');
-        if (blockTypeSelect.length) {
-            blockTypeSelect.on('change', function() {
-                updateFieldVisibility(inline);
-            });
+        if (inline && inline.length) {
             updateFieldVisibility(inline);
         }
     }
@@ -50,6 +46,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup new inlines when they're added
     $(document).on('formset:added', function(event, $row, formsetName) {
-        setupInline($row);
+        if ($row) {
+            setupInline($row);
+        } else {
+            // Try to find the newly added inline
+            const newInline = $('.inline-related').last();
+            setupInline(newInline);
+        }
+    });
+
+    // Use event delegation for change events on block_type selects
+    $(document).on('change', 'select[name$="-block_type"]', function() {
+        const inline = $(this).closest('.inline-related');
+        updateFieldVisibility(inline);
     });
 });

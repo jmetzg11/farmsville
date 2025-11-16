@@ -18,7 +18,7 @@
                     <div class="card-quantity-bar-wrapper">
                         <div class="card-quantity-bar" style="width: {{percentage .Remaining .Qty}}%"></div>
                     </div>
-                    <span class="text-gray-600">{{.Remaining}} / {{.Qty}}</span>
+                    <span class="text-gray-600">{{.Remaining}} / {{.Qty}}{{if eq .ProductName "Eggs"}} (dozen){{end}}</span>
                 </div>
                 <button class="btn" {{if le .Remaining 0}}disabled{{else}}onclick="openClaimModal({{.ID}}, '{{.ProductName}}', {{.Remaining}}, {{.Qty}})"{{end}}>
                     {{if le .Remaining 0}}Out of Stock{{else}}Claim{{end}}
@@ -36,7 +36,7 @@
         <div class="item-card">
             <div class="item-row">
                 <span class="card-title">{{.ProductName}}</span>
-                <span class="card-qty-display">Qty: {{.Qty}}</span>
+                <span class="card-qty-display">Qty: {{.Qty}}{{if eq .ProductName "Eggs"}} (dozen){{end}}</span>
             </div>
             <div class="item-row mt-6">
                 <span class="text-gray-600">{{.User}}</span>

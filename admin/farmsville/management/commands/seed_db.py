@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         # Product names, photos, quantities, and notes
         product_data = [
-            ('Chicken', 'chicken.jpg', 12, 'Farm fresh, free-range'),
+            ('Eggs', 'chicken.jpg', 12, 'Farm fresh, free-range'),
             ('Cow', 'cow.jpg', 10, 'Grass-fed, organic'),
             ('Llama', 'llama.jpeg', 8, 'Soft and warm'),
             ('Llama 2', 'llama_2.jpeg', 15, 'Another friendly llama'),

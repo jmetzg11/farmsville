@@ -6,7 +6,7 @@
         </div>
         <div class="modal-body">
             <p class="text-gray-600 mb-4">
-                Available: <span id="modal-remaining"></span> / <span id="modal-qty"></span>
+                Available: <span id="modal-remaining"></span> / <span id="modal-qty"></span><span id="modal-available-unit"></span>
             </p>
             <div id="claim-error" style="display: none;" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             </div>
@@ -14,7 +14,7 @@
                 <input type="hidden" id="product-id" name="product_id">
 
                 <div class="mb-4">
-                    <label for="claim-qty" class="modal-label">Quantity</label>
+                    <label for="claim-qty" class="modal-label">Quantity<span id="modal-qty-unit"></span></label>
                     <input type="number" id="claim-qty" name="qty" min="1" required class="modal-input">
                 </div>
 

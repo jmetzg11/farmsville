@@ -1,7 +1,10 @@
 function openClaimModal(productId, productName, remaining, qty) {
     document.getElementById('modal-product-name').textContent = productName;
+    const unit = productName === 'Eggs' ? ' (dozen)' : '';
     document.getElementById('modal-remaining').textContent = remaining;
     document.getElementById('modal-qty').textContent = qty;
+    document.getElementById('modal-available-unit').textContent = unit;
+    document.getElementById('modal-qty-unit').textContent = unit;
 
     // Set hidden form fields
     document.getElementById('product-id').value = productId;

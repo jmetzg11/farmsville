@@ -168,6 +168,12 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ['photo_preview']
     inlines = [ProductClaimedInline]
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['qty'].help_text = '(Eggs: in dozen)'
+        form.base_fields['remaining'].help_text = '(Eggs: in dozen)'
+        return form
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related('event', 'product_name', 'photo').prefetch_related('claims')
