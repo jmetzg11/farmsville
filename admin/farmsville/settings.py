@@ -104,6 +104,7 @@ DATABASES = {
         'OPTIONS': {
             'sslmode': 'require' if IS_PRODUCTION else 'disable',
         },
+        'CONN_MAX_AGE': 600,
     }
 }
 
