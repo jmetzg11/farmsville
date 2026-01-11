@@ -75,7 +75,7 @@ ROOT_URLCONF = 'farmsville.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'farmsville' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
