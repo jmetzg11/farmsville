@@ -3,6 +3,7 @@ from django.utils.html import format_html
 from django.conf import settings
 from django import forms
 from supabase import create_client
+from django.db.models import Count, Sum
 from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock
 
 
@@ -13,20 +14,28 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ['date']
     date_hierarchy = 'date'
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(
+            _product_count=Count('products', distinct=True),
+            _total_quantity=Sum('products__qty'),
+            _total_claimed=Sum('products__claims__qty')
+        )
+
     def product_count(self, obj):
-        return obj.products.count()
+        return obj._product_count
     product_count.short_description = 'Products'
+    product_count.admin_order_field = '_product_count'
 
     def total_quantity(self, obj):
-        return sum(p.qty for p in obj.products.all())
+        return obj._total_quantity or 0
     total_quantity.short_description = 'Total Qty'
+    total_quantity.admin_order_field = '_total_quantity'
 
     def total_claimed(self, obj):
-        total = 0
-        for product in obj.products.all():
-            total += sum(claim.qty for claim in product.claims.all())
-        return total
+        return obj._total_claimed or 0
     total_claimed.short_description = 'Total Claimed'
+    total_claimed.admin_order_field = '_total_claimed'
 
 
 @admin.register(ProductName)
@@ -35,9 +44,14 @@ class ProductNameAdmin(admin.ModelAdmin):
     search_fields = ['name']
     ordering = ['name']
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(_product_count=Count('products'))
+
     def product_usage_count(self, obj):
-        return obj.products.count()
+        return obj._product_count
     product_usage_count.short_description = 'Times Used'
+    product_usage_count.admin_order_field = '_product_count'
 
 
 class PhotoAdminForm(forms.ModelForm):
@@ -57,9 +71,14 @@ class PhotoAdmin(admin.ModelAdmin):
     fields = ['name', 'photo_type', 'caption', 'upload_file', 'filename', 'photo_preview']
     readonly_fields = ['filename', 'photo_preview']
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(_usage_count=Count('products'))
+
     def usage_count(self, obj):
-        return obj.products.count()
+        return obj._usage_count
     usage_count.short_description = 'Used By'
+    usage_count.admin_order_field = '_usage_count'
 
     def photo_preview(self, obj):
         if obj.filename:
@@ -278,12 +297,13 @@ class BlogPostAdmin(admin.ModelAdmin):
     fields = ['title', 'is_published']
     inlines = [ContentBlockInline]
 
-    def block_count(self, obj):
-        return obj.content_blocks.count()
-    block_count.short_description = 'Content Blocks'
-
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('content_blocks')
+        return qs.annotate(_block_count=Count('content_blocks'))
+
+    def block_count(self, obj):
+        return obj._block_count
+    block_count.short_description = 'Content Blocks'
+    block_count.admin_order_field = '_block_count'
 
 

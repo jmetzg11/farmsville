@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Event(models.Model):
-    date = models.DateField()
+    date = models.DateField(db_index=True)
 
     def __str__(self):
         return str(self.date)
@@ -55,7 +55,7 @@ class Product(models.Model):
 
 class ProductClaimed(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='claims')
-    datetime = models.DateTimeField()
+    datetime = models.DateTimeField(db_index=True)
     user_name = models.CharField(max_length=200)
     qty = models.IntegerField()
     notes = models.TextField(blank=True, null=True)
@@ -70,9 +70,9 @@ class ProductClaimed(models.Model):
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False, db_index=True)
 
     def __str__(self):
         return self.title
