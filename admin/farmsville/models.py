@@ -53,6 +53,13 @@ class Product(models.Model):
         ordering = ['event', 'product_name']
 
 
+class AddProductShortcut(Product):
+    class Meta:
+        proxy = True
+        verbose_name = 'Add Product'
+        verbose_name_plural = 'Add Product'
+
+
 class ProductClaimed(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='claims')
     datetime = models.DateTimeField(db_index=True)

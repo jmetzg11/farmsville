@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils import timezone
 from django.conf import settings
 from django import forms
+from django.shortcuts import redirect
 from supabase import create_client
 from django.db.models import Count, Sum
-from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock
+from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock, AddProductShortcut
 
 
 @admin.register(Event)
@@ -170,8 +172,8 @@ class PhotoAdmin(admin.ModelAdmin):
 class ProductClaimedInline(admin.TabularInline):
     model = ProductClaimed
     extra = 0
-    fields = ['datetime', 'user_name', 'qty', 'notes']
-    readonly_fields = []
+    fields = ['user_name', 'qty', 'notes', 'datetime']
+    readonly_fields = ['datetime']
     can_delete = True
 
 
@@ -186,6 +188,14 @@ class ProductAdmin(admin.ModelAdmin):
     fields = ['event', 'product_name', 'qty', 'remaining', 'notes', 'photo', 'photo_preview']
     readonly_fields = ['photo_preview']
     inlines = [ProductClaimedInline]
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        if 'event' not in initial:
+            latest_event = Event.objects.first()  # Already ordered by -date
+            if latest_event:
+                initial['event'] = latest_event.pk
+        return initial
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -232,6 +242,14 @@ class ProductAdmin(admin.ModelAdmin):
             )
         return "No photo"
     photo_preview.short_description = 'Current Photo'
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, ProductClaimed) and not instance.pk:
+                instance.datetime = timezone.now()
+            instance.save()
+        formset.save_m2m()
 
 
 @admin.register(ProductClaimed)
@@ -307,3 +325,16 @@ class BlogPostAdmin(admin.ModelAdmin):
     block_count.admin_order_field = '_block_count'
 
 
+@admin.register(AddProductShortcut)
+class AddProductShortcutAdmin(admin.ModelAdmin):
+    def changelist_view(self, request, extra_context=None):
+        return redirect('admin:farmsville_product_add')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
