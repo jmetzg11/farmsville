@@ -56,8 +56,8 @@
 
         .label {
             width: 62mm;
-            height: 30mm;
-            padding: 3mm;
+            height: 29mm;
+            padding: 2mm;
             border: 1px dashed #ccc;
             background: white;
             display: flex;
@@ -66,20 +66,20 @@
         }
 
         .product-name {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
         }
 
         .quantity {
-            font-size: 12pt;
+            font-size: 11pt;
             text-align: center;
             margin-bottom: 1mm;
         }
 
         .user-name {
-            font-size: 10pt;
+            font-size: 9pt;
             text-align: center;
             margin-bottom: 1mm;
         }
@@ -98,9 +98,16 @@
             border-radius: 8px;
         }
 
+        /* Print-specific styles for Brother QL-820NWB 62mm labels */
         @media print {
+            @page {
+                size: 62mm 29mm;
+                margin: 0;
+            }
+
             body {
                 padding: 0;
+                margin: 0;
                 background: white;
             }
 
@@ -109,12 +116,21 @@
             }
 
             .labels-container {
-                gap: 0;
+                display: block;
             }
 
             .label {
+                width: 62mm;
+                height: 29mm;
+                padding: 2mm;
+                margin: 0;
                 border: none;
+                page-break-after: always;
                 page-break-inside: avoid;
+            }
+
+            .label:last-child {
+                page-break-after: auto;
             }
         }
     </style>
