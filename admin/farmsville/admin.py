@@ -6,7 +6,8 @@ from django import forms
 from django.shortcuts import redirect
 from supabase import create_client
 from django.db.models import Count, Sum
-from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock, AddProductShortcut
+from django.template.response import TemplateResponse
+from .models import Event, ProductName, Photo, Product, ProductClaimed, BlogPost, ContentBlock, AddProductShortcut, PrintProductsClaimed
 
 
 @admin.register(Event)
@@ -329,6 +330,43 @@ class BlogPostAdmin(admin.ModelAdmin):
 class AddProductShortcutAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         return redirect('admin:farmsville_product_add')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PrintProductsClaimed)
+class PrintProductsClaimedAdmin(admin.ModelAdmin):
+    def changelist_view(self, request, extra_context=None):
+        event_id = request.GET.get('event')
+        events = Event.objects.all()[:20]
+
+        claims = ProductClaimed.objects.select_related(
+            'product', 'product__product_name', 'product__event'
+        ).order_by('-datetime')
+
+        if event_id:
+            claims = claims.filter(product__event_id=event_id)
+            selected_event_id = int(event_id)
+        else:
+            latest_event = Event.objects.first()
+            if latest_event:
+                claims = claims.filter(product__event=latest_event)
+                selected_event_id = latest_event.id
+            else:
+                selected_event_id = None
+
+        return TemplateResponse(request, 'admin/print_labels.html', {
+            'claims': claims,
+            'events': events,
+            'selected_event_id': selected_event_id,
+        })
 
     def has_add_permission(self, request):
         return False

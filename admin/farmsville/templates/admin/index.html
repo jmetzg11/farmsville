@@ -1,25 +1,47 @@
-{% extends "admin/index.html" %}
-{% load i18n %}
+{% extends "admin/index.html" %} {% load i18n %} {% block content %}
+<div
+  style="
+    background: #e8f4f8;
+    border: 1px solid #b8daff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  "
+>
+  <h2 style="margin-top: 0; color: #004085">Getting Started</h2>
 
-{% block content %}
-<div style="background: #e8f4f8; border: 1px solid #b8daff; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-    <h2 style="margin-top: 0; color: #004085;">Getting Started</h2>
+  <h3 style="color: #155724">Adding Products for an Event</h3>
+  <ol style="line-height: 1.8">
+    <li>
+      First, create an <a href="/farmsville/event/">Event</a> (this is the date
+      for the product availability)
+    </li>
+    <li>
+      Go to <a href="/farmsville/addproductshortcut/">Add Product</a> to add
+      products to the event
+    </li>
+    <li>Each product needs a Product Name, quantity, and optionally a photo</li>
+  </ol>
 
-    <h3 style="color: #155724;">Adding Products for an Event</h3>
-    <ol style="line-height: 1.8;">
-        <li>First, create an <a href="/farmsville/event/">Event</a> (this is the date for the product availability)</li>
-        <li>Go to <a href="/farmsville/addproductshortcut/">Add Product</a> to add products to the event</li>
-        <li>Each product needs a Product Name, quantity, and optionally a photo</li>
+  <h3 style="color: #155724">Creating a Blog Post</h3>
+  <ol style="line-height: 1.8">
+    <li>
+      Go to <a href="/farmsville/blogpost/add/">Blog Posts</a> and click "Add"
+    </li>
+    <li>Add a title and check "Is published" when ready to make it visible</li>
+    <li>Add content blocks for text, photos, or YouTube videos</li>
+    <li>
+      For YouTube videos, use just the video ID (e.g., <code>rmojioqOlzk</code>)
+      not the full URL
+    </li>
+  </ol>
+
+  <h3>
+    Printing
+    <ol>
+      <l1>Create labels in pdf</l1>
     </ol>
-
-    <h3 style="color: #155724;">Creating a Blog Post</h3>
-    <ol style="line-height: 1.8;">
-        <li>Go to <a href="/farmsville/blogpost/add/">Blog Posts</a> and click "Add"</li>
-        <li>Add a title and check "Is published" when ready to make it visible</li>
-        <li>Add content blocks for text, photos, or YouTube videos</li>
-        <li>For YouTube videos, use just the video ID (e.g., <code>rmojioqOlzk</code>) not the full URL</li>
-    </ol>
+  </h3>
 </div>
 
-{{ block.super }}
-{% endblock %}
+{{ block.super }} {% endblock %}

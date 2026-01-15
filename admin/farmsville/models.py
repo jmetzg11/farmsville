@@ -88,6 +88,13 @@ class BlogPost(models.Model):
         ordering = ['-created_at']
 
 
+class PrintProductsClaimed(ProductClaimed):
+    class Meta:
+        proxy = True
+        verbose_name = 'Print Labels'
+        verbose_name_plural = 'Print Labels'
+
+
 class ContentBlock(models.Model):
     class BlockType(models.TextChoices):
         TEXT = 'text', 'Text/Paragraph'
