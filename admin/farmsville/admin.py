@@ -344,28 +344,16 @@ class AddProductShortcutAdmin(admin.ModelAdmin):
 @admin.register(PrintProductsClaimed)
 class PrintProductsClaimedAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
-        event_id = request.GET.get('event')
-        events = Event.objects.all()[:20]
-
-        claims = ProductClaimed.objects.select_related(
-            'product', 'product__product_name', 'product__event'
-        ).order_by('-datetime')
-
-        if event_id:
-            claims = claims.filter(product__event_id=event_id)
-            selected_event_id = int(event_id)
-        else:
-            latest_event = Event.objects.first()
-            if latest_event:
-                claims = claims.filter(product__event=latest_event)
-                selected_event_id = latest_event.id
-            else:
-                selected_event_id = None
+        latest_event = Event.objects.first()
+        claims = []
+        if latest_event:
+            claims = ProductClaimed.objects.select_related(
+                'product__product_name'
+            ).filter(product__event=latest_event).order_by('user_name')
 
         return TemplateResponse(request, 'admin/print_labels.html', {
             'claims': claims,
-            'events': events,
-            'selected_event_id': selected_event_id,
+            'event': latest_event,
         })
 
     def has_add_permission(self, request):

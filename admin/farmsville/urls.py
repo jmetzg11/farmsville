@@ -17,8 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
+from . import views
 
 urlpatterns = [
     path('', admin.site.urls),
     path('admin/', lambda request: redirect('/', permanent=True)),
+    path('print-label/', views.print_label, name='print_label'),
+    path('print-labels/', views.print_labels_batch, name='print_labels_batch'),
 ]

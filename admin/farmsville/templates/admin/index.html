@@ -1,11 +1,15 @@
-{% extends "admin/index.html" %} {% load i18n %} {% block content %}
+{% extends "admin/index.html" %}
+{% load i18n %}
+{% block content %}
+{{ block.super }}
+
 <div
   style="
     background: #e8f4f8;
     border: 1px solid #b8daff;
     border-radius: 8px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin-top: 20px;
   "
 >
   <h2 style="margin-top: 0; color: #004085">Getting Started</h2>
@@ -36,14 +40,22 @@
     </li>
   </ol>
 
-  <h3>
-    Printing
-    <ol>
-      <l1>Download the thing</l1>
-      <l1>Select 192.168.2.200</l1>
-      <l1>Create labels in pdf</l1>
-    </ol>
-  </h3>
-</div>
+  <h3 style="color: #155724">Printing Labels</h3>
+  <ol style="line-height: 1.8">
+    <li>Install Brother Print Service Plugin on Android</li>
+    <li>Go to <a href="/farmsville/printproductsclaimed/">Print Labels</a></li>
+    <li>Select printer: QL-820NWB (192.168.2.200)</li>
+    <li>Paper size: 2.4" x 39"</li>
+  </ol>
 
-{{ block.super }} {% endblock %}
+  <h3 style="color: #856404">Printer Setup (Jesse)</h3>
+  <ol style="line-height: 1.8">
+    <li>Access the printer's web page (http://192.168.2.200)</li>
+    <li>Navigate to Network > Wireless > TCP/IP</li>
+    <li>Set Boot Method to Static</li>
+    <li>Set IP Address to 192.168.2.200</li>
+    <li>On the Printer: Menu > Administration > Command Mode > Raster</li>
+    <li>Set Template Mode to Off</li>
+  </ol>
+</div>
+{% endblock %}
