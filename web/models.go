@@ -52,7 +52,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		JOIN farmsville_productname pn ON p.product_name_id = pn.id
 		LEFT JOIN farmsville_photo ph ON p.photo_id = ph.id
 		LEFT JOIN farmsville_productclaimed pc ON p.id = pc.product_id
-		WHERE e.date >= $1
+		WHERE e.date + INTERVAL '2 days' >= $1
 		GROUP BY p.id, p.event_id, pn.name, p.qty, p.remaining, p.notes, ph.filename, ph.photo_type, e.date
 		ORDER BY e.date, pn.name
 	`
