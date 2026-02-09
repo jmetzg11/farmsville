@@ -35,6 +35,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
+RUN apk add --no-cache tzdata
+
 # Copy only the binary (UI files are embedded in it)
 COPY --from=go-builder /app/web/main .
 
