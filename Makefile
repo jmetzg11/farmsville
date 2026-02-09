@@ -1,5 +1,5 @@
 start-db:
-	cd data && docker-compose up -d postgres && echo "Waiting for PostgreSQL to be ready..." && until docker-compose exec postgres pg_isready -U admin -d farmsville; do sleep 1; done && echo "PostgreSQL is ready!"
+	cd data && docker compose up -d postgres && echo "Waiting for PostgreSQL to be ready..." && until docker compose exec postgres pg_isready -U admin -d farmsville; do sleep 1; done && echo "PostgreSQL is ready!"
 
 run: start-db
 	@echo "Starting Django admin..."
@@ -24,4 +24,4 @@ stop:
 	@echo "Stopping Tailwind CSS watcher..."
 	-pkill -f "tailwindcss.*--watch"
 	@echo "Stopping PostgreSQL..."
-	cd data && docker-compose down -v
+	cd data && docker compose down -v
