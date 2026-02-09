@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 	"golang.org/x/time/rate"
@@ -49,12 +50,16 @@ func connectDB(prod bool) (*sql.DB, error) {
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
+	pacific, _ := time.LoadLocation("America/Los_Angeles")
 	funcMap := template.FuncMap{
 		"percentage": func(remaining, total int) float64 {
 			if total == 0 {
 				return 0
 			}
 			return (float64(remaining) / float64(total)) * 100
+		},
+		"formatPacific": func(t time.Time) string {
+			return t.In(pacific).Format("2006-01-02 15:04")
 		},
 	}
 
