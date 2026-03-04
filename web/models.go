@@ -27,7 +27,8 @@ type ProductClaimed struct {
 }
 
 func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error) {
-	today := time.Now().Format("2006-01-02")
+	pacific, _ := time.LoadLocation("America/Los_Angeles")
+	now := time.Now().In(pacific)
 
 	query := `
 		SELECT
@@ -57,7 +58,7 @@ func (app *application) getFutureProducts() ([]Product, []ProductClaimed, error)
 		ORDER BY e.date, pn.name
 	`
 
-	rows, err := app.db.Query(query, today)
+	rows, err := app.db.Query(query, now)
 	if err != nil {
 		return nil, nil, err
 	}
